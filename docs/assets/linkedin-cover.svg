@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 627" width="1200" height="627" font-family="Inter, 'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFF4E8"/>
+      <stop offset="55%" stop-color="#FDE8DC"/>
+      <stop offset="100%" stop-color="#F8E0D6"/>
+    </linearGradient>
+    <linearGradient id="brain" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFB59A"/>
+      <stop offset="55%" stop-color="#FF8A73"/>
+      <stop offset="100%" stop-color="#E86A5A"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFC7A6" stop-opacity="0.65"/>
+      <stop offset="60%" stop-color="#FFB59A" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#FFB59A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="g-ingest" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FFE3C9"/>
+      <stop offset="100%" stop-color="#FFD0A8"/>
+    </linearGradient>
+    <linearGradient id="g-end" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FCD9E5"/>
+      <stop offset="100%" stop-color="#F6B8D1"/>
+    </linearGradient>
+    <linearGradient id="g-query" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FFF0C9"/>
+      <stop offset="100%" stop-color="#FFE08A"/>
+    </linearGradient>
+    <filter id="soft-shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" in="SourceAlpha"/>
+      <feOffset dx="0" dy="3" result="off"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.18"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="12"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="627" fill="url(#bg)"/>
+
+  <g opacity="0.45">
+    <circle cx="1140" cy="70" r="140" fill="#FFE0C7"/>
+    <circle cx="60" cy="540" r="150" fill="#FFD9CC"/>
+    <circle cx="1100" cy="580" r="110" fill="#FCE2D0"/>
+  </g>
+
+  <text x="600" y="72" text-anchor="middle" fill="#2A1A14" font-size="40" font-weight="800" letter-spacing="-0.6">A Living Memory for Every AI Coding Agent</text>
+  <text x="600" y="104" text-anchor="middle" fill="#7A5A4A" font-size="17" font-weight="500" letter-spacing="0.3">One wiki that learns every session, feeds every agent, powers every project</text>
+
+  <!-- LEFT inputs -->
+  <g>
+    <g transform="translate(70,155)" filter="url(#soft-shadow)">
+      <rect width="88" height="66" rx="12" fill="#ffffff" stroke="#E8C7B5" stroke-width="1.2"/>
+      <g transform="translate(24,10)">
+        <rect x="0" y="0" width="40" height="46" rx="4" fill="#FFF3E8" stroke="#C76A55" stroke-width="1.6"/>
+        <line x1="6" y1="12" x2="34" y2="12" stroke="#C76A55" stroke-width="1.6"/>
+        <line x1="6" y1="20" x2="34" y2="20" stroke="#C76A55" stroke-width="1.6"/>
+        <line x1="6" y1="28" x2="28" y2="28" stroke="#C76A55" stroke-width="1.6"/>
+        <line x1="6" y1="36" x2="22" y2="36" stroke="#C76A55" stroke-width="1.6"/>
+      </g>
+    </g>
+    <text x="114" y="238" text-anchor="middle" font-size="11" font-weight="700" fill="#7A5A4A" letter-spacing="1">ARTICLES</text>
+
+    <g transform="translate(70,258)" filter="url(#soft-shadow)">
+      <rect width="88" height="66" rx="12" fill="#ffffff" stroke="#E8C7B5" stroke-width="1.2"/>
+      <g transform="translate(22,12)">
+        <circle cx="22" cy="22" r="20" stroke="#C76A55" stroke-width="1.8" fill="#FFF3E8"/>
+        <line x1="22" y1="22" x2="22" y2="10" stroke="#C76A55" stroke-width="2" stroke-linecap="round"/>
+        <line x1="22" y1="22" x2="32" y2="26" stroke="#C76A55" stroke-width="2" stroke-linecap="round"/>
+      </g>
+    </g>
+    <text x="114" y="340" text-anchor="middle" font-size="11" font-weight="700" fill="#7A5A4A" letter-spacing="1">SESSIONS</text>
+
+    <g transform="translate(70,360)" filter="url(#soft-shadow)">
+      <rect width="88" height="66" rx="12" fill="#ffffff" stroke="#E8C7B5" stroke-width="1.2"/>
+      <g transform="translate(26,14)">
+        <ellipse cx="18" cy="22" rx="12" ry="15" fill="#FFF3E8" stroke="#C76A55" stroke-width="1.8"/>
+        <line x1="18" y1="8" x2="18" y2="2" stroke="#C76A55" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="6" y1="18" x2="0" y2="14" stroke="#C76A55" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="30" y1="18" x2="36" y2="14" stroke="#C76A55" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="6" y1="30" x2="0" y2="34" stroke="#C76A55" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="30" y1="30" x2="36" y2="34" stroke="#C76A55" stroke-width="1.8" stroke-linecap="round"/>
+      </g>
+    </g>
+    <text x="114" y="442" text-anchor="middle" font-size="11" font-weight="700" fill="#7A5A4A" letter-spacing="1">DEBUG LESSONS</text>
+
+    <g transform="translate(195,195)" filter="url(#soft-shadow)">
+      <rect width="88" height="66" rx="12" fill="#ffffff" stroke="#E8C7B5" stroke-width="1.2"/>
+      <g transform="translate(18,18)" fill="none" stroke="#C76A55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14,4 L4,16 L14,28"/>
+        <path d="M38,4 L48,16 L38,28"/>
+        <line x1="26" y1="2" x2="22" y2="30"/>
+      </g>
+    </g>
+    <text x="239" y="278" text-anchor="middle" font-size="11" font-weight="700" fill="#7A5A4A" letter-spacing="1">PATTERNS</text>
+
+    <g transform="translate(195,318)" filter="url(#soft-shadow)">
+      <rect width="88" height="66" rx="12" fill="#ffffff" stroke="#E8C7B5" stroke-width="1.2"/>
+      <g transform="translate(20,10)">
+        <rect x="0" y="0" width="34" height="46" rx="3" fill="#FFF3E8" stroke="#C76A55" stroke-width="1.6"/>
+        <rect x="8" y="4" width="34" height="46" rx="3" fill="#FFF3E8" stroke="#C76A55" stroke-width="1.6"/>
+        <line x1="14" y1="16" x2="36" y2="16" stroke="#C76A55" stroke-width="1.4"/>
+        <line x1="14" y1="24" x2="36" y2="24" stroke="#C76A55" stroke-width="1.4"/>
+        <line x1="14" y1="32" x2="30" y2="32" stroke="#C76A55" stroke-width="1.4"/>
+      </g>
+    </g>
+    <text x="239" y="400" text-anchor="middle" font-size="11" font-weight="700" fill="#7A5A4A" letter-spacing="1">DOMAIN DOCS</text>
+  </g>
+
+  <g stroke="#C76A55" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-dasharray="1 6" opacity="0.75">
+    <path d="M160,190 C 290,210 380,260 475,290"/>
+    <path d="M160,290 C 290,295 380,295 475,305"/>
+    <path d="M160,390 C 290,370 380,340 475,320"/>
+    <path d="M285,225 C 360,245 420,265 475,298"/>
+    <path d="M285,348 C 360,335 420,322 475,310"/>
+  </g>
+  <g fill="#C76A55">
+    <circle cx="478" cy="290" r="3"/>
+    <circle cx="478" cy="305" r="3"/>
+    <circle cx="478" cy="320" r="3"/>
+  </g>
+
+  <!-- CENTER brain -->
+  <g transform="translate(600,310)">
+    <circle cx="0" cy="0" r="170" fill="url(#halo)" filter="url(#glow)"/>
+    <g transform="translate(-4,0)">
+      <path d="M 0,-80 C -22,-94 -62,-90 -82,-74 C -108,-66 -124,-40 -116,-14 C -134,4 -132,36 -112,52 C -114,76 -86,98 -60,92 C -46,108 -16,110 -2,96 L -2,-78 Z" fill="url(#brain)" stroke="#B84A3A" stroke-width="2"/>
+      <g fill="none" stroke="#8E3826" stroke-width="1.6" stroke-linecap="round" opacity="0.85">
+        <path d="M-20,-70 C -40,-60 -40,-40 -22,-34"/>
+        <path d="M-46,-56 C -66,-46 -70,-20 -52,-10"/>
+        <path d="M-80,-50 C -98,-34 -96,-10 -78,2"/>
+        <path d="M-110,-10 C -98,6 -82,10 -62,6"/>
+        <path d="M-100,16 C -82,30 -64,32 -44,24"/>
+        <path d="M-86,40 C -70,54 -42,56 -28,46"/>
+        <path d="M-60,72 C -48,86 -28,90 -14,82"/>
+        <path d="M-30,-30 C -16,-20 -10,-6 -14,8"/>
+        <path d="M-38,30 C -22,40 -12,48 -12,62"/>
+      </g>
+    </g>
+    <g transform="translate(4,0) scale(-1,1)">
+      <path d="M 0,-80 C -22,-94 -62,-90 -82,-74 C -108,-66 -124,-40 -116,-14 C -134,4 -132,36 -112,52 C -114,76 -86,98 -60,92 C -46,108 -16,110 -2,96 L -2,-78 Z" fill="url(#brain)" stroke="#B84A3A" stroke-width="2"/>
+      <g fill="none" stroke="#8E3826" stroke-width="1.6" stroke-linecap="round" opacity="0.85">
+        <path d="M-20,-70 C -40,-60 -40,-40 -22,-34"/>
+        <path d="M-46,-56 C -66,-46 -70,-20 -52,-10"/>
+        <path d="M-80,-50 C -98,-34 -96,-10 -78,2"/>
+        <path d="M-110,-10 C -98,6 -82,10 -62,6"/>
+        <path d="M-100,16 C -82,30 -64,32 -44,24"/>
+        <path d="M-86,40 C -70,54 -42,56 -28,46"/>
+        <path d="M-60,72 C -48,86 -28,90 -14,82"/>
+        <path d="M-30,-30 C -16,-20 -10,-6 -14,8"/>
+        <path d="M-38,30 C -22,40 -12,48 -12,62"/>
+      </g>
+    </g>
+    <path d="M0,-94 C 6,-60 -6,-30 2,0 C 10,30 -4,60 0,98" stroke="#8E3826" stroke-width="1.8" fill="none" opacity="0.9"/>
+    <g>
+      <circle cx="-50" cy="-38" r="5" fill="#FFE08A" stroke="#B84A3A" stroke-width="1"/>
+      <circle cx="58" cy="-26" r="5" fill="#FFE08A" stroke="#B84A3A" stroke-width="1"/>
+      <circle cx="-34" cy="42" r="4.5" fill="#FFE08A" stroke="#B84A3A" stroke-width="1"/>
+      <circle cx="36" cy="60" r="4.5" fill="#FFE08A" stroke="#B84A3A" stroke-width="1"/>
+      <circle cx="0" cy="-58" r="4" fill="#FFE08A" stroke="#B84A3A" stroke-width="1"/>
+    </g>
+    <g transform="translate(-66,116)">
+      <rect width="132" height="34" rx="17" fill="#2A1A14"/>
+      <text x="66" y="23" text-anchor="middle" fill="#FFE08A" font-size="14" font-weight="800" letter-spacing="2">memory/</text>
+    </g>
+  </g>
+
+  <!-- RIGHT: GitHub Copilot (primary) with sub-agent chips -->
+  <g transform="translate(870,160)" filter="url(#soft-shadow)">
+    <rect x="0" y="0" width="280" height="96" rx="22" fill="#ffffff" stroke="#3B82F6" stroke-width="1.8"/>
+    <circle cx="30" cy="46" r="16" fill="#0B0B2B"/>
+    <path d="M22,49 q4,-8 8,-8 q4,0 8,8 M26,46 a2,2 0 1 0 0.1,0 M34,46 a2,2 0 1 0 0.1,0" stroke="#ffffff" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <text x="56" y="38" font-size="11" fill="#5B4A8A" font-weight="700" letter-spacing="1">GITHUB</text>
+    <text x="56" y="62" font-size="22" fill="#0B0B2B" font-weight="800">Copilot</text>
+    <text x="56" y="82" font-size="11" fill="#7A5A4A" font-weight="500">one config, every model</text>
+  </g>
+
+  <!-- Bracket from Copilot down to sub-agents -->
+  <g stroke="#3B82F6" stroke-width="1.6" fill="none" opacity="0.7">
+    <line x1="1010" y1="256" x2="1010" y2="278"/>
+    <line x1="900" y1="278" x2="1120" y2="278"/>
+    <line x1="900" y1="278" x2="900" y2="294"/>
+    <line x1="973" y1="278" x2="973" y2="294"/>
+    <line x1="1047" y1="278" x2="1047" y2="294"/>
+    <line x1="1120" y1="278" x2="1120" y2="294"/>
+  </g>
+
+  <!-- Sub-agent chips under Copilot -->
+  <g font-weight="700">
+    <g transform="translate(870,294)" filter="url(#soft-shadow)">
+      <rect width="60" height="42" rx="11" fill="#FDF2F8" stroke="#F472B6" stroke-width="1.3"/>
+      <circle cx="14" cy="21" r="6" fill="#F472B6"/>
+      <text x="24" y="25" font-size="12" fill="#2A1A14" font-weight="800">Claude</text>
+    </g>
+    <g transform="translate(944,294)" filter="url(#soft-shadow)">
+      <rect width="58" height="42" rx="11" fill="#FFF7ED" stroke="#F97316" stroke-width="1.3"/>
+      <circle cx="14" cy="21" r="6" fill="#F97316"/>
+      <text x="24" y="25" font-size="12" fill="#2A1A14" font-weight="800">Codex</text>
+    </g>
+    <g transform="translate(1016,294)" filter="url(#soft-shadow)">
+      <rect width="62" height="42" rx="11" fill="#ECFEFF" stroke="#22D3EE" stroke-width="1.3"/>
+      <circle cx="14" cy="21" r="6" fill="#22D3EE"/>
+      <text x="24" y="25" font-size="12" fill="#2A1A14" font-weight="800">Gemini</text>
+    </g>
+    <g transform="translate(1092,294)" filter="url(#soft-shadow)">
+      <rect width="58" height="42" rx="11" fill="#ECFDF5" stroke="#10B981" stroke-width="1.3"/>
+      <circle cx="14" cy="21" r="6" fill="#10B981"/>
+      <text x="24" y="25" font-size="11" fill="#2A1A14" font-weight="800">+ more</text>
+    </g>
+  </g>
+
+  <!-- Chat bubbles below = what agents produce -->
+  <g>
+    <g transform="translate(860,358)" filter="url(#soft-shadow)">
+      <path d="M0,14 a14,14 0 0 1 14,-14 h236 a14,14 0 0 1 14,14 v40 a14,14 0 0 1 -14,14 h-210 l-14,16 l-2,-16 h-24 a14,14 0 0 1 -14,-14 z" fill="#FFF7EE" stroke="#E8C7B5" stroke-width="1.4"/>
+      <text x="20" y="28" font-size="12" fill="#7A5A4A" font-weight="700" letter-spacing="0.5">AGENT, DAY 1</text>
+      <text x="20" y="50" font-size="13" fill="#2A1A14" font-weight="600">"Using utf-8 encoding to avoid</text>
+      <text x="20" y="66" font-size="13" fill="#2A1A14" font-weight="600">the Windows subprocess bug"</text>
+    </g>
+    <g transform="translate(860,446)" filter="url(#soft-shadow)">
+      <path d="M0,14 a14,14 0 0 1 14,-14 h236 a14,14 0 0 1 14,14 v40 a14,14 0 0 1 -14,14 h-210 l-14,16 l-2,-16 h-24 a14,14 0 0 1 -14,-14 z" fill="#FDF2F8" stroke="#F6B8D1" stroke-width="1.4"/>
+      <text x="20" y="28" font-size="12" fill="#83254E" font-weight="700" letter-spacing="0.5">CROSS-PROJECT RECALL</text>
+      <text x="20" y="50" font-size="13" fill="#2A1A14" font-weight="600">"APIM header casing issue,</text>
+      <text x="20" y="66" font-size="13" fill="#2A1A14" font-weight="600">fix already in the wiki"</text>
+    </g>
+  </g>
+
+  <!-- Arrows from brain to agents/bubbles -->
+  <g stroke="#7C5CFF" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-dasharray="1 6" opacity="0.7">
+    <path d="M720,280 C 800,240 840,215 870,205"/>
+    <path d="M720,330 C 800,360 830,375 860,388"/>
+    <path d="M720,360 C 790,420 820,450 860,470"/>
+  </g>
+  <g fill="#7C5CFF">
+    <circle cx="868" cy="205" r="3"/>
+    <circle cx="858" cy="388" r="3"/>
+    <circle cx="858" cy="470" r="3"/>
+  </g>
+
+  <!-- BOTTOM: skill pills -->
+  <text x="600" y="512" text-anchor="middle" font-size="12" font-weight="700" fill="#7A5A4A" letter-spacing="3">THREE SIMPLE SKILLS, ANY AGENT CAN RUN THEM</text>
+  <g transform="translate(270,528)">
+    <g filter="url(#soft-shadow)">
+      <rect x="0" y="0" width="170" height="56" rx="28" fill="url(#g-ingest)" stroke="#E8A678" stroke-width="1.4"/>
+      <g transform="translate(20,16)">
+        <circle cx="12" cy="12" r="12" fill="#ffffff" stroke="#C76A55" stroke-width="1.4"/>
+        <path d="M12,5 L12,17 M6,11 L12,17 L18,11" stroke="#C76A55" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      </g>
+      <text x="58" y="35" font-size="20" fill="#7A3A28" font-weight="800">Ingest</text>
+    </g>
+    <text x="195" y="38" font-size="26" fill="#C76A55" font-weight="800">&#8594;</text>
+    <g transform="translate(220,0)" filter="url(#soft-shadow)">
+      <rect x="0" y="0" width="210" height="56" rx="28" fill="url(#g-end)" stroke="#E896B4" stroke-width="1.4"/>
+      <g transform="translate(20,16)">
+        <circle cx="12" cy="12" r="12" fill="#ffffff" stroke="#B83268" stroke-width="1.4"/>
+        <path d="M12,6 L12,12 L16,15" stroke="#B83268" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      </g>
+      <text x="58" y="35" font-size="20" fill="#83254E" font-weight="800">End Session</text>
+    </g>
+    <text x="455" y="38" font-size="26" fill="#C76A55" font-weight="800">&#8594;</text>
+    <g transform="translate(480,0)" filter="url(#soft-shadow)">
+      <rect x="0" y="0" width="170" height="56" rx="28" fill="url(#g-query)" stroke="#E8C87C" stroke-width="1.4"/>
+      <g transform="translate(20,16)">
+        <circle cx="12" cy="12" r="12" fill="#ffffff" stroke="#9A7A1F" stroke-width="1.4"/>
+        <circle cx="10" cy="10" r="4" stroke="#9A7A1F" stroke-width="1.6" fill="none"/>
+        <line x1="13" y1="13" x2="17" y2="17" stroke="#9A7A1F" stroke-width="1.8" stroke-linecap="round"/>
+      </g>
+      <text x="58" y="35" font-size="20" fill="#6A4E14" font-weight="800">Query</text>
+    </g>
+  </g>
+
+  <g>
+    <text x="60" y="613" fill="#7A5A4A" font-size="13" font-weight="700">github.com/ozgurkarahan/ai-agent-memory</text>
+    <text x="1140" y="613" text-anchor="end" fill="#9A7A6A" font-size="12" font-weight="500" opacity="0.9">Inspired by Karpathy's LLM Wiki pattern</text>
+  </g>
+</svg>

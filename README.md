@@ -2,11 +2,21 @@
 
 > A practical, git-native implementation of the [Karpathy LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) pattern for persistent coding-agent memory.
 
-**The problem:** AI coding agents are stateless. Every session starts from scratch. Your knowledge compounds, but your agents' doesn't.
+**The problem:** AI coding agents are stateless — every session starts from scratch. But it gets worse: if you use GitHub Copilot with multiple agents (built-in + 3rd-party like Claude, Codex), each has its own instruction format. Maintaining separate config files across every project, for every agent, doesn't scale. And knowledge stays siloed per project — a pattern you discovered in one client project is invisible to the next.
 
-**The solution:** A local markdown wiki that lives alongside your projects. Your agents read it for context. You browse it in Obsidian. Knowledge compounds across sessions and tools.
+**The solution:** A central markdown wiki that all your agents share, across all your projects. Each project points to it through a single `AGENT.md`; each agent-specific config file (`.github/copilot-instructions.md`, `CLAUDE.md`, etc.) simply redirects there. The wiki grows with every session — call `end-session` and the agent captures lessons, decisions, and patterns back into the wiki. Knowledge learned in one project (a deployment gotcha, an API pattern, a debugging technique) is immediately available in every other project. The next session, with *any* agent, on *any* project, starts with all that accumulated knowledge.
 
-Works with: **Claude Code** · **GitHub Copilot** · **Codex** · **Cursor** · **Gemini CLI** · **Aider**
+Works with: **GitHub Copilot** · **Claude Code** · **Codex** · **Cursor** · **Gemini CLI** · **Aider**
+
+---
+
+## Motivation
+
+I use **GitHub Copilot** daily — not just the built-in agent, but also the 3rd-party agents available inside it (Claude, Codex, and others). Each agent has its own instruction file format (`.github/copilot-instructions.md`, `CLAUDE.md`, `AGENTS.md`, `.cursor/rules/`…). Creating and maintaining agent-specific config files across every project doesn't scale.
+
+Instead of duplicating context everywhere, I built a **central LLM wiki** using the [Karpathy pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f). It holds my skills, commands, workflows, domain knowledge, and lessons learned — all in plain markdown. Every project points to it through a single `AGENT.md`, and every agent-specific config file simply redirects there.
+
+The wiki is a **living memory**. It keeps growing regardless of which agent I'm using. At the end of every coding session, I call `end-session` — the agent reviews the session, captures lessons, and writes them back to the wiki. The next session — with *any* agent — starts with all that accumulated knowledge. No context is lost, no knowledge is siloed.
 
 ---
 
@@ -24,50 +34,78 @@ $EDITOR memory/agent-config/platform.md
 # "Read ~/projects/memory/agent-config/workflow.md for global rules."
 ```
 
-### Option 2: Bootstrap from scratch
+### Option 2: Ask your agent to bootstrap it
 
-Give [`bootstrap.md`](bootstrap.md) to any AI coding agent. It contains the full setup instructions — the agent will create the wiki structure for you.
+You don't need to set anything up manually. Just give [`bootstrap.md`](bootstrap.md) to your AI coding agent — it contains step-by-step instructions that the agent will follow to create the entire memory system.
 
+**With GitHub Copilot (VS Code):**
+
+1. Open a new folder in VS Code (this will become your `memory/` project)
+2. Open Copilot Chat (Ctrl+I) in agent mode
+3. Say: *"Follow the instructions in bootstrap.md to set up a persistent memory wiki"* and attach the file
+4. The agent creates the full directory structure, schema, workflows, templates, and example content
+5. Verify the structure, then commit
+
+**With any other agent (Claude Code, Codex, Cursor…):**
+
+1. Copy the contents of `bootstrap.md`
+2. Paste it into your agent's chat
+3. The agent follows the instructions and creates everything
+4. Verify and commit
+
+Once the wiki exists, add a pointer in each project's instruction file. For GitHub Copilot, add this to `.github/copilot-instructions.md`:
+
+```markdown
+Read these files for full context:
+- `AGENT.md` — Project instructions
+- `~/projects/memory/agent-config/workflow.md` — Global workflow rules
+
+## Wiki Skills
+When the user says "ingest", follow: `~/projects/memory/workflows/ingest.md`
+When the user says "end session", follow: `~/projects/memory/workflows/end-session.md`
 ```
-# Copy the contents of bootstrap.md → paste into your AI agent → verify setup
-```
+
+That's it — your agent now has persistent memory and 3 skills.
 
 ---
 
 ## Architecture
 
-Projects reference the memory wiki via `AGENT.md` pointers. The wiki has three layers:
+Projects reference the memory wiki via `AGENT.md` pointers. Each project has agent-specific config files (`.github/copilot-instructions.md`, `CLAUDE.md`) that all redirect to the same `AGENT.md`, which in turn points to the central memory wiki. The wiki has three layers:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                      YOUR PROJECTS                       │
-│                                                          │
-│  project-a/           project-b/          project-c/     │
-│  ├── AGENT.md ──┐     ├── AGENT.md ──┐    ├── AGENT.md   │
-│  ├── CLAUDE.md  │     ├── CLAUDE.md  │    └── ...        │
-│  └── src/       │     └── src/       │                   │
-│                 │                    │                    │
-│                 ▼                    ▼                    │
-│          ┌──────────────────────────────────┐             │
-│          │          MEMORY WIKI             │             │
-│          │  ┌────────────────────────────┐  │             │
-│          │  │ Layer 1: Instructions      │  │             │
-│          │  │ agent-config/workflow.md   │  │             │
-│          │  │ agent-config/platform.md   │  │             │
-│          │  ├────────────────────────────┤  │             │
-│          │  │ Layer 2: Workflows         │  │             │
-│          │  │ workflows/ingest.md        │  │             │
-│          │  │ workflows/end-session.md   │  │             │
-│          │  │ workflows/query.md         │  │             │
-│          │  ├────────────────────────────┤  │             │
-│          │  │ Layer 3: Knowledge         │  │             │
-│          │  │ wiki/projects/             │  │             │
-│          │  │ wiki/domains/              │  │             │
-│          │  │ wiki/patterns/             │  │             │
-│          │  │ wiki/lessons/              │  │             │
-│          │  └────────────────────────────┘  │             │
-│          └──────────────────────────────────┘             │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                         YOUR PROJECTS                            │
+│                                                                  │
+│  project-a/                project-b/             project-c/     │
+│  ├── .github/              ├── .github/           ├── .github/   │
+│  │   └── copilot-          │   └── copilot-       │   └── ...    │
+│  │       instructions.md   │       instructions.md│              │
+│  ├── AGENT.md ──┐          ├── AGENT.md ──┐       ├── AGENT.md   │
+│  ├── CLAUDE.md  │          ├── CLAUDE.md  │       └── src/       │
+│  └── src/       │          └── src/       │                      │
+│                 │                         │                      │
+│                 ▼                         ▼                      │
+│          ┌──────────────────────────────────────┐                │
+│          │           MEMORY WIKI                │                │
+│          │  ┌────────────────────────────────┐  │                │
+│          │  │ Layer 1: Instructions          │  │                │
+│          │  │ agent-config/workflow.md       │  │                │
+│          │  │ agent-config/platform.md       │  │                │
+│          │  ├────────────────────────────────┤  │                │
+│          │  │ Layer 2: Workflows             │  │                │
+│          │  │ workflows/ingest.md            │  │                │
+│          │  │ workflows/end-session.md       │  │                │
+│          │  │ workflows/query.md             │  │                │
+│          │  ├────────────────────────────────┤  │                │
+│          │  │ Layer 3: Knowledge             │  │                │
+│          │  │ wiki/projects/                 │  │                │
+│          │  │ wiki/domains/                  │  │                │
+│          │  │ wiki/patterns/                 │  │                │
+│          │  │ wiki/lessons/                  │  │                │
+│          │  └────────────────────────────────┘  │                │
+│          └──────────────────────────────────────┘                │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 **Layer 1 — Instructions:** Global rules (workflow conventions, platform preferences) that every agent reads at session start.
@@ -75,6 +113,31 @@ Projects reference the memory wiki via `AGENT.md` pointers. The wiki has three l
 **Layer 2 — Workflows:** Step-by-step procedures agents follow for ingesting knowledge, ending sessions, and querying the wiki.
 
 **Layer 3 — Knowledge:** The wiki itself — project pages, domain references, reusable patterns, and debugging lessons. Grows over time.
+
+### How GitHub Copilot Connects
+
+GitHub Copilot automatically reads `.github/copilot-instructions.md` at the start of every chat session. This file acts as the entry point into the memory system:
+
+```markdown
+# .github/copilot-instructions.md
+
+# Copilot Instructions
+
+Read these files for full context:
+
+- `AGENT.md` — Project instructions, workflow rules, architecture, key paths
+- `~/projects/memory/wiki/projects/{project}.md` — Project wiki page (lessons, decisions)
+- `~/projects/memory/agent-config/workflow.md` — Global workflow rules
+
+## Copilot-Specific Tips
+
+- Use `@workspace` to give Copilot full project context
+- Pin `AGENT.md` in chat for persistent context
+- Use Copilot Edits (Ctrl+Shift+I) for multi-file changes
+- When corrected, update the project wiki page
+```
+
+This same pattern works for every agent — each reads its own config file, but all of them end up at the same `AGENT.md` and the same memory wiki. One source of truth, multiple entry points.
 
 ---
 
@@ -104,23 +167,24 @@ Ask any question. The agent reads `index.md` first for navigation, then reads re
 
 ## Agent Compatibility
 
-### Config File Matrix
+### GitHub Copilot — Primary Workflow
 
-Each agent reads a different config file. All point to the same `AGENT.md`:
+GitHub Copilot is the primary agent for this system. It reads `.github/copilot-instructions.md` automatically, and with the **agent mode** in VS Code, it can also use 3rd-party models (Claude, Codex, Gemini) — all of which inherit the same instruction file. This means you configure once and every agent inside Copilot gets the same context.
 
 | File | Purpose | Read By |
 |------|---------|---------|
-| `AGENT.md` | Project identity + workflow rules | All agents (standard) |
-| `CLAUDE.md` | Pointer → `AGENT.md` | Claude Code |
-| `.github/copilot-instructions.md` | Pointer → `AGENT.md` | GitHub Copilot |
+| `.github/copilot-instructions.md` | Auto-loaded by Copilot → points to `AGENT.md` | **GitHub Copilot** (+ all agents within it) |
+| `AGENT.md` | Project identity + workflow rules + wiki pointers | All agents (standard) |
+| `CLAUDE.md` | Pointer → `AGENT.md` | Claude Code (standalone) |
 | `.cursor/rules/` | Pointer → `AGENT.md` | Cursor |
 
 ### Agent Support
 
 | Agent | Config File | Memory Access | Status |
 |-------|-------------|---------------|--------|
-| Claude Code | `CLAUDE.md` | Full filesystem | ✅ Tested |
 | GitHub Copilot | `.github/copilot-instructions.md` | Workspace files | ✅ Tested |
+| GitHub Copilot (3rd-party agents) | `.github/copilot-instructions.md` (shared) | Workspace files | ✅ Tested |
+| Claude Code | `CLAUDE.md` | Full filesystem | ✅ Tested |
 | Codex (OpenAI) | `AGENT.md` (native) | Sandbox (limited) | ⚠️ Partial |
 | Cursor | `.cursor/rules/` | Workspace files | ⚠️ Partial |
 | Gemini CLI | `AGENT.md` (native) | Full filesystem | ⚠️ Partial |

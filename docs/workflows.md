@@ -9,6 +9,8 @@ This repo includes three core workflows that agents follow to maintain and use t
 3. `AGENT.md` references the wiki at `memory/` for accumulated knowledge
 4. The wiki's `memory/workflows/` directory contains the step-by-step procedures below
 
+**GitHub Copilot note:** `.github/copilot-instructions.md` is auto-loaded by Copilot at session start. When using 3rd-party agents within Copilot (Claude, Codex, etc.), they all share the same instruction file — so every agent in the Copilot ecosystem automatically discovers the memory wiki through one config file.
+
 ## Core Workflows
 
 ### 1. Ingest — Adding Knowledge to the Wiki

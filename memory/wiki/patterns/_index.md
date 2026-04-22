@@ -12,6 +12,7 @@ Reusable architecture and design patterns discovered across projects.
 | Pattern | Summary |
 |---------|---------|
 | [[retry-with-backoff]] | Exponential backoff for resilient API and connection calls |
+| [[identity-propagation]] | Token forwarding through multi-tier APIs using OBO flow |
 
 ## Related
 

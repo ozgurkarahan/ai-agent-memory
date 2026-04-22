@@ -1,6 +1,6 @@
 # AI Agent Memory — Bootstrap Prompt
 
-> **Give this file to your AI coding agent** (Claude Code, GitHub Copilot, Codex, Cursor, Windsurf, etc.) in a new project folder.
+> **Give this file to your AI coding agent** (GitHub Copilot, Claude Code, Codex, Cursor, Windsurf, etc.) in a new project folder.
 >
 > The agent will create a **persistent memory wiki** that compounds knowledge across coding sessions. No more re-explaining your stack, debugging the same issues twice, or losing hard-won lessons.
 >

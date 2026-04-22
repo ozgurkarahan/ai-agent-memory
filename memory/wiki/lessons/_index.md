@@ -12,6 +12,8 @@ Consolidated debugging history and cross-project gotchas.
 | Lesson | Summary |
 |--------|---------|
 | [[api-auth-debugging]] | Common API authentication debugging patterns and rules |
+| [[apim-header-casing]] | APIM header casing breaks legacy backend integrations |
+| [[windows-subprocess-encoding]] | Windows subprocess defaults to cp1252, not UTF-8 |
 
 ## Related
 

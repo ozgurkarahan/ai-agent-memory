@@ -12,6 +12,8 @@ Technical domain deep-dives — frameworks, platforms, and concepts.
 | Domain | Summary |
 |--------|---------|
 | [[fastapi]] | FastAPI framework patterns, middleware, and deployment |
+| [[azure-api-management]] | APIM policies, rate limiting, subscriptions, and gotchas |
+| [[azure-entra-id]] | Auth flows, tokens, managed identity, and B2C patterns |
 
 ## Related
 

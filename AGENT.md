@@ -2,7 +2,9 @@
 
 ## Overview
 
-Public demo repo showing the Karpathy LLM Wiki pattern for persistent AI coding agent memory. Provides a practical, git-native approach to giving AI agents (Claude Code, GitHub Copilot, Codex, Cursor) long-term memory across sessions.
+Public demo repo showing the Karpathy LLM Wiki pattern for persistent AI coding agent memory. Provides a practical, git-native approach to giving AI agents (GitHub Copilot, Claude Code, Codex, Cursor) long-term memory across sessions and across projects.
+
+The wiki is agent-agnostic — GitHub Copilot reads `.github/copilot-instructions.md`, which points to `AGENT.md`, which references the central wiki. 3rd-party agents within Copilot (Claude, Codex) share the same instruction file. Knowledge compounds regardless of which agent or project you're working on.
 
 All demo content is fictional — no client data, no personal information.
 
@@ -14,7 +16,7 @@ All demo content is fictional — no client data, no personal information.
 | `project-template/` | Starter files for onboarding a new project |
 | `demo-project/` | A fictional project demonstrating the pattern end-to-end |
 | `docs/workflows.md` | Human-readable workflows overview |
-| `docs/linkedin-article.md` | LinkedIn article draft for publishing |
+| `docs/article-llm-wiki-memory.md` | Article draft — LLM Wiki memory system |
 | `bootstrap.md` | Single-file starter prompt — give to any agent to set up the system |
 | `README.md` | Comprehensive guide for GitHub visitors |
 
