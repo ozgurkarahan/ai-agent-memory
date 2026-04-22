@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a demo repo showing the Karpathy LLM Wiki pattern for persistent AI coding agent memory. It provides a practical, git-native approach to giving AI agents (Claude Code, GitHub Copilot, Codex, Cursor) long-term memory across sessions using a local wiki of markdown files.
+Public demo repo showing the Karpathy LLM Wiki pattern for persistent AI coding agent memory. Provides a practical, git-native approach to giving AI agents (Claude Code, GitHub Copilot, Codex, Cursor) long-term memory across sessions.
 
 All demo content is fictional — no client data, no personal information.
 
@@ -10,32 +10,41 @@ All demo content is fictional — no client data, no personal information.
 
 | Path | Description |
 |------|-------------|
-| `memory/` | The LLM Wiki — agent config, wiki pages, glossary, logs |
+| `memory/` | The demo LLM Wiki — agent config, wiki pages, glossary, logs |
 | `project-template/` | Starter files for onboarding a new project |
 | `demo-project/` | A fictional project demonstrating the pattern end-to-end |
-| `docs/` | Guides, tutorials, and reference documentation |
-| `bootstrap.md` | Quick-start guide for setting up memory in a new project |
+| `docs/workflows.md` | Human-readable workflows overview |
+| `docs/linkedin-article.md` | LinkedIn article draft for publishing |
+| `bootstrap.md` | Single-file starter prompt — give to any agent to set up the system |
+| `README.md` | Comprehensive guide for GitHub visitors |
 
 ## Conventions
 
-- All demo content uses fictional projects, people, and data.
-- No client data, credentials, or personal information — ever.
-- Keep markdown files concise and scannable.
-- Use consistent frontmatter and `[[backlink]]` conventions from `memory/schema.md`.
+- All demo content uses fictional projects, people, and data — marked with `<!-- DEMO DATA -->`
+- No client data, credentials, or personal information — ever
+- Use consistent frontmatter and `[[wikilink]]` conventions from `memory/schema.md`
 
-## Workflow
+## Workflow Rules
 
-Read `memory/agent-config/workflow.md` for generic workflow rules that apply across all projects. Key rules:
+Read `~/projects/memory/agent-config/workflow.md` for global workflow rules. Key rules:
 
 1. **Plan Before Coding** — For any task with 3+ steps, outline first.
 2. **Verify Before Done** — Never mark complete without proving it works.
-3. **Learn From Mistakes** — Update lessons-learned after corrections.
+3. **Learn From Mistakes** — Update the project wiki page at `~/projects/memory/wiki/projects/ai-agent-memory.md`.
 4. **No Blind Retries** — Diagnose root cause on failure.
 5. **Keep It Simple** — Don't over-engineer.
 
+## Reference Documents
+
+| Document | Contents |
+|----------|----------|
+| `~/projects/memory/wiki/projects/ai-agent-memory.md` | Project wiki page (lessons, decisions) |
+| `~/projects/memory/agent-config/workflow.md` | Global workflow rules |
+| `~/projects/memory/agent-config/platform.md` | Platform preferences |
+
 ## What NOT To Do
 
-- Do not add real client data or personal information.
-- Do not create files unless necessary — prefer editing existing ones.
-- Do not commit secrets or `.env` files.
-- Do not skip verification steps.
+- Do not add real client data or personal information
+- Do not create files unless necessary — prefer editing existing ones
+- Do not commit secrets or `.env` files
+- Do not skip verification steps
