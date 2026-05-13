@@ -197,31 +197,36 @@ After scaffolding all projects, output:
 
 ### Launch commands
 
-For each project, suggest BOTH agent options AND the platform-appropriate variant. Prefer PS1 on Windows (primary), SH on Git Bash / Linux / macOS:
+For each project, suggest both agent options. Use whichever CLI the user has installed; the commands are equivalent in scope (allow-all-tools / bypass-permissions). `cd` first so the agent picks up the project's `AGENT.md`.
 
-**PowerShell (default on Windows):**
+**PowerShell (Windows):**
 ```powershell
-# GitHub Copilot CLI (default agent today)
-~/projects/memory/scripts/launch-copilot.ps1 ~\projects\{ClientName}\10-projects\{project-slug}
+cd ~\projects\{ClientName}\10-projects\{project-slug}
+
+# GitHub Copilot CLI
+copilot --allow-all-tools
 
 # Claude Code (alternative)
-~/projects/memory/scripts/launch-claude.ps1 ~\projects\{ClientName}\10-projects\{project-slug}
+claude --dangerously-skip-permissions
 ```
 
-**Bash:**
+**Bash (Linux / macOS / Git Bash):**
 ```bash
-# GitHub Copilot CLI (default)
-bash ~/projects/memory/scripts/launch-copilot.sh ~/projects/{ClientName}/10-projects/{project-slug}
+cd ~/projects/{ClientName}/10-projects/{project-slug}
+
+# GitHub Copilot CLI
+copilot --allow-all-tools
 
 # Claude Code (alternative)
-bash ~/projects/memory/scripts/launch-claude.sh ~/projects/{ClientName}/10-projects/{project-slug}
+claude --dangerously-skip-permissions
 ```
 
 ### Suggested initial prompts
 
-For each project, suggest a specific first prompt based on the topic and format. Example (PowerShell):
+For each project, suggest a specific first prompt based on the topic and format. Pipe it to the agent with `-p`:
 ```powershell
-~/projects/memory/scripts/launch-copilot.ps1 ~\projects\Acme\10-projects\agent-framework-engagement "Research the latest agentic AI capabilities, then propose a presentation outline with demo scenarios for technical leadership"
+cd ~\projects\Acme\10-projects\agent-framework-engagement
+copilot --allow-all-tools -p "Research the latest agentic AI capabilities, then propose a presentation outline with demo scenarios for technical leadership"
 ```
 
 ### Summary table
