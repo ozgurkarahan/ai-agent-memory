@@ -7,20 +7,30 @@ Versioning follows [Calendar Versioning](https://calver.org/) (`YYYY.0M.MICRO`) 
 
 ## [Unreleased]
 
+## [2026.05.1] — 2026-05-13
+
+Adds Claude Code as a first-class agent surface and polishes the surrounding docs.
+
 ### Added
 
 - **`.claude/skills/{slug}/SKILL.md` surface** — Claude Code agents working inside a clone of this repo now auto-discover all 9 skills via Claude Code's project-scoped skill discovery (`.claude/skills/`). Each `SKILL.md` carries the YAML frontmatter Claude Code expects (`name`, `description`) so the skill router can match user requests against the right skill. The repo is now **tri-surface** and treats GitHub Copilot CLI and Claude Code symmetrically:
   - `.github/instructions/{slug}.instructions.md` — Copilot CLI
   - `.claude/skills/{slug}/SKILL.md` — Claude Code
   - `memory/workflows/{slug}.md` — agent-agnostic plain-Markdown reference
+- `.gitignore` exception pattern (`.claude/*` + `!.claude/skills/` + `!.claude/skills/**`) so the public skills surface ships with the repo while personal Claude Code state stays ignored.
 
 ### Changed
 
 - `CONTRIBUTING.md` — "dual-surface" guidance updated to "tri-surface", with a table summarising each surface's frontmatter requirements and rationale.
+- `README.md` — "How It Works" rewritten (was "Three workflows drive the system", now reflects 9 skills); "Agent Compatibility" tables add rows for GitHub Copilot CLI (`.github/instructions/`) and Claude Code project-scoped skills (`.claude/skills/`).
 
 ### Fixed
 
 - `plan-week` / `close-week` skills (both `.github/instructions/` and `memory/workflows/` surfaces) — removed leaked references to `~/.claude/skills/{slug}/SKILL.md (mirror) — abridged here:`. With the new `.claude/skills/` surface now shipping in the repo, each surface is self-contained — no dangling pointer needed, and the procedure flows directly from the trigger sentence.
+
+### Notes
+
+- Reference: [PR #3](https://github.com/ozgurkarahan/ai-agent-memory/pull/3).
 
 ## [2026.05.0] — 2026-05-13
 
@@ -60,5 +70,6 @@ First versioned release. Brings the new and updated agent skills from the mainta
 - `review-sessions` defines an agent-agnostic contract but no reference parser ships in this release — implementers should match the schema documented in the skill (Copilot CLI event-stream parser + Claude Code turn parser).
 - Reference: [PR #1](https://github.com/ozgurkarahan/ai-agent-memory/pull/1).
 
-[Unreleased]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.05.0...HEAD
+[Unreleased]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.05.1...HEAD
+[2026.05.1]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.05.0...v2026.05.1
 [2026.05.0]: https://github.com/ozgurkarahan/ai-agent-memory/releases/tag/v2026.05.0
