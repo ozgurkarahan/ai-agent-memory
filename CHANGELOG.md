@@ -7,6 +7,10 @@ Versioning follows [Calendar Versioning](https://calver.org/) (`YYYY.0M.MICRO`) 
 
 ## [Unreleased]
 
+## [2026.05.2] — 2026-05-13
+
+Completes the public-facing setup: a fresh clone now ships a viable `project-template/` for `new-engagement`, and `bootstrap.md` installs the full **9 skills × 3 surfaces** that the rest of the repo already provides.
+
 ### Added
 
 - **`project-template/` completed to match the canonical scaffold** expected by the `new-engagement` skill. Five files added so a user who clones this repo gets a viable template: `LICENSE` (MIT), `README.md` (template-aware), `.claude/CLAUDE.md` (Claude Code project config + project-context block), `.claude/commands/status.md` (`/status` slash-command for 30-second project briefing), and `.github/instructions/end-session.instructions.md` (per-project end-session shim pointing back to the central memory wiki). The template's `.gitignore` was updated so `.claude/CLAUDE.md` and `.claude/commands/` are tracked while the rest of `.claude/` stays ignored.
@@ -84,6 +88,7 @@ First versioned release. Brings the new and updated agent skills from the mainta
 - `review-sessions` defines an agent-agnostic contract but no reference parser ships in this release — implementers should match the schema documented in the skill (Copilot CLI event-stream parser + Claude Code turn parser).
 - Reference: [PR #1](https://github.com/ozgurkarahan/ai-agent-memory/pull/1).
 
-[Unreleased]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.05.1...HEAD
+[Unreleased]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.05.2...HEAD
+[2026.05.2]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.05.1...v2026.05.2
 [2026.05.1]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.05.0...v2026.05.1
 [2026.05.0]: https://github.com/ozgurkarahan/ai-agent-memory/releases/tag/v2026.05.0
