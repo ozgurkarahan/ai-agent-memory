@@ -1,6 +1,6 @@
 ---
 name: new-engagement
-description: Scaffold one or more client engagement projects from ~/projects/project-template/: parse client + topic + format from the request, copy template files, create format-specific folders (slides/, demos/, exercises/, ...), pre-fill AGENT.md, create wiki memory page, init git. Trigger: "new engagement", "scaffold engagement", "/new-engagement".
+description: "Scaffold one or more client engagement projects from ~/projects/project-template/: parse client + topic + format from the request, copy template files, create format-specific folders (slides/, demos/, exercises/, ...), pre-fill AGENT.md, create wiki memory page, init git. Trigger: 'new engagement', 'scaffold engagement', '/new-engagement'."
 ---
 
 # New Engagement

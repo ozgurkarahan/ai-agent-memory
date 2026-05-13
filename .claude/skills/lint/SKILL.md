@@ -1,6 +1,6 @@
 ---
 name: lint
-description: Run wiki health checks (structural + semantic) and report findings by severity: critical (orphans, missing frontmatter), important (cross-reference gaps, thin pages), informational. Trigger: "lint", "health check", "check wiki".
+description: "Run wiki health checks (structural + semantic) and report findings by severity: critical (orphans, missing frontmatter), important (cross-reference gaps, thin pages), informational. Trigger: 'lint', 'health check', 'check wiki'."
 ---
 
 # Lint Wiki

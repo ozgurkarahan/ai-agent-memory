@@ -1,6 +1,6 @@
 ---
 name: plan-week
-description: Plan the upcoming ISO week: resolve active week (TZ Europe/Paris), lift carry-over from prior week's "Seed for W+1" block, aggregate open `- [ ]` todos from project + meeting pages, draft a Monday plan grouped by topic. Trigger: "plan week", "Monday plan", "/plan-week".
+description: "Plan the upcoming ISO week: resolve active week (TZ Europe/Paris), lift carry-over from prior week's 'Seed for W+1' block, aggregate open `- [ ]` todos from project + meeting pages, draft a Monday plan grouped by topic. Trigger: 'plan week', 'Monday plan', '/plan-week'."
 ---
 
 # Plan Week

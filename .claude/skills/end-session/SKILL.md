@@ -1,6 +1,6 @@
 ---
 name: end-session
-description: Wrap up the current coding session: update the project wiki page with lessons and decisions, graduate cross-cutting findings to domain / pattern / lesson pages, check git status, present a status table. Trigger: "end session", "wrap up", "done for today".
+description: "Wrap up the current coding session: update the project wiki page with lessons and decisions, graduate cross-cutting findings to domain / pattern / lesson pages, check git status, present a status table. Trigger: 'end session', 'wrap up', 'done for today'."
 ---
 
 # End Session

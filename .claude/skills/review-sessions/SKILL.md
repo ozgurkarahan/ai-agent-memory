@@ -1,6 +1,6 @@
 ---
 name: review-sessions
-description: Analyse coding-agent session data (GitHub Copilot CLI events.jsonl and/or Claude Code conversation jsonl) to surface workflow efficiency, prompt-quality patterns, error trends, tool usage, security hygiene, session patterns. Supports `--agent {copilot,claude,all}`. Trigger: "review sessions", "session review", "/review-sessions".
+description: "Analyse coding-agent session data (GitHub Copilot CLI events.jsonl and/or Claude Code conversation jsonl) to surface workflow efficiency, prompt-quality patterns, error trends, tool usage, security hygiene, session patterns. Supports `--agent {copilot,claude,all}`. Trigger: 'review sessions', 'session review', '/review-sessions'."
 ---
 
 # Review Sessions

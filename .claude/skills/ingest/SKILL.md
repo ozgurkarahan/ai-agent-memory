@@ -1,6 +1,6 @@
 ---
 name: ingest
-description: Ingest a source document into the wiki following the Karpathy LLM Wiki pattern. Compile content into structured frontmatter + Markdown pages, resolve [[wikilinks]] against the existing graph, update related pages, run lint, emit activity event. Trigger: "ingest [source]", "mass ingest [batch]".
+description: "Ingest a source document into the wiki following the Karpathy LLM Wiki pattern. Compile content into structured frontmatter + Markdown pages, resolve [[wikilinks]] against the existing graph, update related pages, run lint, emit activity event. Trigger: 'ingest [source]', 'mass ingest [batch]'."
 ---
 
 # Ingest Source — LLM-Compiled Wiki Ingestion (Karpathy Pattern)

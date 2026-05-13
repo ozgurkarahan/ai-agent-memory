@@ -1,6 +1,6 @@
 ---
 name: project-status
-description: Produce a 30-second situational-awareness briefing for any child project: tech stack, folder structure, git history, recent changes, deployment status, current state, link to wiki project page. Trigger: "project status", "status briefing", "/project-status".
+description: "Produce a 30-second situational-awareness briefing for any child project: tech stack, folder structure, git history, recent changes, deployment status, current state, link to wiki project page. Trigger: 'project status', 'status briefing', '/project-status'."
 ---
 
 # Project Status

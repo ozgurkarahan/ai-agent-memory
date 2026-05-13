@@ -1,6 +1,6 @@
 ---
 name: query
-description: Answer a question by searching the wiki: read index.md, find relevant pages, synthesize an answer with [[wikilink]] citations, file the answer in wiki/_queries/, update log.md. Trigger: "query [question]" or a direct knowledge-base question.
+description: "Answer a question by searching the wiki: read index.md, find relevant pages, synthesize an answer with [[wikilink]] citations, file the answer in wiki/_queries/, update log.md. Trigger: 'query [question]' or a direct knowledge-base question."
 ---
 
 # Query Wiki
