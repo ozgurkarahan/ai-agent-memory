@@ -323,6 +323,12 @@ Use same-workspace mode: place `memory/` inside your project directory so the ag
 
 ---
 
+## Release notes
+
+See [CHANGELOG.md](CHANGELOG.md) for the version history. Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for skill style, changelog conventions, and the release process.
+
+---
+
 ## Credits
 
 - [Andrej Karpathy — LLM Wiki gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) — the original idea
