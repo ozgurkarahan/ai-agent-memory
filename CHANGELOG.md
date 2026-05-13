@@ -7,7 +7,9 @@ Versioning follows [Calendar Versioning](https://calver.org/) (`YYYY.0M.MICRO`) 
 
 ## [Unreleased]
 
-_Nothing yet — open a PR and add your entry here._
+### Fixed
+
+- `plan-week` / `close-week` skills (both `.github/instructions/` and `memory/workflows/` surfaces) — removed leaked references to `~/.claude/skills/{slug}/SKILL.md (mirror) — abridged here:`. Those paths existed only in the maintainer's private setup; in this repo the skills under `.github/instructions/` and `memory/workflows/` *are* the canonical source. The numbered procedure now flows directly from the trigger sentence, no dangling pointer.
 
 ## [2026.05.0] — 2026-05-13
 
