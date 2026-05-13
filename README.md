@@ -38,6 +38,10 @@ $EDITOR memory/agent-config/platform.md
 
 You don't need to set anything up manually. Just give [`bootstrap.md`](bootstrap.md) to your AI coding agent — it contains step-by-step instructions that the agent will follow to create the entire memory system.
 
+`bootstrap.md` is **fully self-contained** (~80 KB, no network access required). It installs all 9 skills × 3 surfaces (`.github/instructions/`, `.claude/skills/`, `memory/workflows/`) plus the optional `project-template/` scaffold consumed by `new-engagement`.
+
+> **Maintainers:** `bootstrap.md` is regenerated from the canonical skill bodies + `project-template/` files by [`scripts/regenerate-bootstrap.py`](scripts/regenerate-bootstrap.py). Run `python scripts/regenerate-bootstrap.py` after any skill or template change.
+
 **With GitHub Copilot (VS Code):**
 
 1. Open a new folder in VS Code (this will become your `memory/` project)
@@ -213,7 +217,12 @@ ai-agent-memory/
 ├── AGENT.md                   # Project instructions for AI agents
 ├── CLAUDE.md                  # Claude Code pointer → AGENT.md
 ├── LICENSE                    # MIT
-├── bootstrap.md               # Full bootstrap instructions for any agent
+├── bootstrap.md               # Self-contained bootstrap prompt (regenerated from this repo)
+├── CHANGELOG.md               # Calendar-versioned release notes
+├── CONTRIBUTING.md            # Contribution & release process
+│
+├── scripts/
+│   └── regenerate-bootstrap.py  # Regenerates bootstrap.md from skill bodies + project-template
 │
 ├── .github/
 │   ├── copilot-instructions.md  # GitHub Copilot pointer → AGENT.md
@@ -262,10 +271,20 @@ ai-agent-memory/
 │   ├── .github/
 │   └── src/
 │
-└── project-template/          # Starter template for new projects
-    ├── AGENT.md
-    ├── CLAUDE.md
+└── project-template/          # Canonical scaffold consumed by the new-engagement skill
+    ├── AGENT.md               #   - Project identity (single source of truth)
+    ├── CLAUDE.md              #   - Thin shim → "Read AGENT.md"
+    ├── README.md              #   - Human-facing template README
+    ├── LICENSE                #   - MIT
+    ├── .gitignore             #   - Tracks .claude/CLAUDE.md + .claude/commands/, ignores the rest
+    ├── .claude/
+    │   ├── CLAUDE.md          #   - Claude Code project config + project-context block
+    │   └── commands/
+    │       └── status.md      #   - /status slash-command (30-second project briefing)
     └── .github/
+        ├── copilot-instructions.md          # Copilot pointer → AGENT.md
+        └── instructions/
+            └── end-session.instructions.md  # Per-project end-session shim
 ```
 
 ---

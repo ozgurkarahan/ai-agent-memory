@@ -7,8 +7,11 @@ Thumbs.db
 .idea/
 *.swp
 
-# Claude Code
-.claude/
+# Claude Code (track project config + slash commands, ignore personal state)
+.claude/*
+!.claude/CLAUDE.md
+!.claude/commands/
+!.claude/commands/**
 
 # Environment
 .env

@@ -6,8 +6,15 @@ applyTo: "**"
 
 When the user says **"new engagement"**, **"scaffold engagement"**, or invokes a slash command like `/new-engagement`, scaffold one or more new client engagement projects from `~/projects/project-template/`.
 
-> **Canonical structure source of truth:** `wiki/projects/project-template.md`.
-> The physical `~/projects/project-template/` repo may contain extra files (`.ai/`, `.claude/`, `README.md`, `.github/instructions/`) that are template-internal cruft and **must not** be copied into scaffolded projects.
+> **Prerequisites:** this skill expects a local clone of the project template at `~/projects/project-template/`. Set it up once:
+>
+> ```bash
+> git clone --depth 1 https://github.com/ozgurkarahan/ai-agent-memory.git /tmp/aim
+> cp -R /tmp/aim/project-template ~/projects/project-template
+> rm -rf /tmp/aim
+> ```
+>
+> The canonical template is shipped at [`project-template/`](https://github.com/ozgurkarahan/ai-agent-memory/tree/master/project-template) in this repo. If you customise it locally, keep it aligned with the canonical scaffold listed in Step 2b below.
 
 ## Step 1: Parse the request
 

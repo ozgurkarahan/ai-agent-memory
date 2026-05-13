@@ -7,6 +7,20 @@ Versioning follows [Calendar Versioning](https://calver.org/) (`YYYY.0M.MICRO`) 
 
 ## [Unreleased]
 
+### Added
+
+- **`project-template/` completed to match the canonical scaffold** expected by the `new-engagement` skill. Five files added so a user who clones this repo gets a viable template: `LICENSE` (MIT), `README.md` (template-aware), `.claude/CLAUDE.md` (Claude Code project config + project-context block), `.claude/commands/status.md` (`/status` slash-command for 30-second project briefing), and `.github/instructions/end-session.instructions.md` (per-project end-session shim pointing back to the central memory wiki). The template's `.gitignore` was updated so `.claude/CLAUDE.md` and `.claude/commands/` are tracked while the rest of `.claude/` stays ignored.
+- **`scripts/regenerate-bootstrap.py`** — generator that assembles a fully self-contained `bootstrap.md` from the canonical skill bodies (`memory/workflows/{slug}.md`), Claude Code descriptions (`.claude/skills/{slug}/SKILL.md`), and the `project-template/` scaffold. Run after any skill or template change to keep `bootstrap.md` in sync. Writes UTF-8 bytes directly to the output file to bypass PowerShell's stdout transcoding (which produces mojibake on `>` redirect).
+
+### Changed
+
+- **`bootstrap.md` fully re-synced** with the post-tri-surface repo state. Now installs **9 skills × 3 surfaces** (was: 3 skills × 1 surface) — `ingest`, `end-session`, `query`, `lint`, `plan-week`, `close-week`, `project-status`, `review-sessions`, `new-engagement` — each emitted as `.github/instructions/{slug}.instructions.md` + `.claude/skills/{slug}/SKILL.md` + `memory/workflows/{slug}.md`. Adds the full 9-file `project-template/` scaffold as an optional Step 11. Adds `memory/ops/weekly/` + `memory/ops/activity.jsonl` to the directory tree so `plan-week`/`close-week` have somewhere to read/write. Verification checklist updated. Final file is ~80 KB and self-contained — paste it to any AI coding agent in a new project folder and it builds the full memory system with no network access required.
+- **`new-engagement` skill (all three surfaces)** — replaced the internal "canonical structure source of truth: `wiki/projects/project-template.md`" + cruft warning (which referenced the maintainer's private wiki page) with a concrete **Prerequisites** block that tells public users exactly how to set up `~/projects/project-template/` from this repo's `project-template/` folder.
+
+### Fixed
+
+- **YAML in all 9 `.claude/skills/*/SKILL.md` files** — GitHub's frontmatter parser was failing with `mapping values are not allowed in this context` because unquoted descriptions contained `: ` sequences (e.g., `Trigger: '...'`, `ISO week: resolve...`). Every description is now wrapped in double quotes with internal double-quotes replaced by single quotes. Validated by parsing all 9 frontmatter blocks with PyYAML.
+
 ## [2026.05.1] — 2026-05-13
 
 Adds Claude Code as a first-class agent surface and polishes the surrounding docs.
