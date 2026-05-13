@@ -6,8 +6,6 @@ applyTo: "**"
 
 When the user says "plan week", "Monday plan", or "/plan-week":
 
-Follow `~/.claude/skills/plan-week/SKILL.md` (mirror) — abridged here:
-
 1. Resolve active ISO week (TZ Europe/Paris) → `ops/weekly/2026-W{NN}.md`. Create from template if missing.
 2. Lift carry-over from prior week's `### Seed for W{NN}` block.
 3. Grep open `- [ ]` todos in `wiki/projects/*.md` + `wiki/meetings/*.md` (recent activity, last 14 days).

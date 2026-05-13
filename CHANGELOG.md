@@ -7,7 +7,20 @@ Versioning follows [Calendar Versioning](https://calver.org/) (`YYYY.0M.MICRO`) 
 
 ## [Unreleased]
 
-_Nothing yet — open a PR and add your entry here._
+### Added
+
+- **`.claude/skills/{slug}/SKILL.md` surface** — Claude Code agents working inside a clone of this repo now auto-discover all 9 skills via Claude Code's project-scoped skill discovery (`.claude/skills/`). Each `SKILL.md` carries the YAML frontmatter Claude Code expects (`name`, `description`) so the skill router can match user requests against the right skill. The repo is now **tri-surface** and treats GitHub Copilot CLI and Claude Code symmetrically:
+  - `.github/instructions/{slug}.instructions.md` — Copilot CLI
+  - `.claude/skills/{slug}/SKILL.md` — Claude Code
+  - `memory/workflows/{slug}.md` — agent-agnostic plain-Markdown reference
+
+### Changed
+
+- `CONTRIBUTING.md` — "dual-surface" guidance updated to "tri-surface", with a table summarising each surface's frontmatter requirements and rationale.
+
+### Fixed
+
+- `plan-week` / `close-week` skills (both `.github/instructions/` and `memory/workflows/` surfaces) — removed leaked references to `~/.claude/skills/{slug}/SKILL.md (mirror) — abridged here:`. With the new `.claude/skills/` surface now shipping in the repo, each surface is self-contained — no dangling pointer needed, and the procedure flows directly from the trigger sentence.
 
 ## [2026.05.0] — 2026-05-13
 

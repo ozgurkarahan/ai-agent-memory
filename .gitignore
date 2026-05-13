@@ -7,8 +7,10 @@ Thumbs.db
 .idea/
 *.swp
 
-# Claude Code
-.claude/
+# Claude Code (ignore personal state, but ship the public skills surface)
+.claude/*
+!.claude/skills/
+!.claude/skills/**
 
 # Environment
 .env

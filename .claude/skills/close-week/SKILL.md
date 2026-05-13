@@ -1,5 +1,6 @@
 ---
-applyTo: "**"
+name: close-week
+description: Close out the working ISO week: aggregate ops/activity.jsonl events, regenerate the activity table between BEGIN/END sentinels, draft Friday review (wins, misses, lessons to graduate, seed for next week), freeze the week file. Trigger: "close week", "Friday review", "/close-week".
 ---
 
 # Close Week

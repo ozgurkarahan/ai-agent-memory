@@ -6,8 +6,6 @@ applyTo: "**"
 
 When the user says "close week", "Friday review", or "/close-week":
 
-Follow `~/.claude/skills/close-week/SKILL.md` (mirror) — abridged here:
-
 1. Resolve active ISO week (TZ Europe/Paris) → `ops/weekly/2026-W{NN}.md`.
 2. **Aggregate** `ops/activity.jsonl` events for that week — group by `topic`, count `touches`, list `days`, find `last`. Sort by touches desc.
 3. **Regenerate the activity block** between the sentinels (wholesale replace):
