@@ -143,7 +143,7 @@ This same pattern works for every agent — each reads its own config file, but 
 
 ## How It Works
 
-Three workflows drive the system. Agents discover them through `AGENT.md` → `agent-config/workflow.md` → `workflows/`.
+Nine skills drive the system. The three core skills below are the heart of the wiki workflow; six more (`lint`, `plan-week`, `close-week`, `project-status`, `review-sessions`, `new-engagement`) ship alongside them in every supported surface. Agents discover all nine through one of three parallel locations — `.github/instructions/` (GitHub Copilot CLI), `.claude/skills/` (Claude Code), or `memory/workflows/` (human-readable canonical source) — see [CONTRIBUTING.md](CONTRIBUTING.md) for the per-surface frontmatter contract.
 
 ### 1. Ingest — Add knowledge to the wiki
 
@@ -174,8 +174,10 @@ GitHub Copilot is the primary agent for this system. It reads `.github/copilot-i
 | File | Purpose | Read By |
 |------|---------|---------|
 | `.github/copilot-instructions.md` | Auto-loaded by Copilot → points to `AGENT.md` | **GitHub Copilot** (+ all agents within it) |
+| `.github/instructions/*.instructions.md` | Auto-loaded by GitHub Copilot CLI; each file is a skill keyed off a trigger phrase | **GitHub Copilot CLI** |
 | `AGENT.md` | Project identity + workflow rules + wiki pointers | All agents (standard) |
 | `CLAUDE.md` | Pointer → `AGENT.md` | Claude Code (standalone) |
+| `.claude/skills/{slug}/SKILL.md` | Auto-discovered by Claude Code inside this repo; routed by the `description:` field | **Claude Code** (project-scoped) |
 | `.cursor/rules/` | Pointer → `AGENT.md` | Cursor |
 
 ### Agent Support
@@ -183,8 +185,9 @@ GitHub Copilot is the primary agent for this system. It reads `.github/copilot-i
 | Agent | Config File | Memory Access | Status |
 |-------|-------------|---------------|--------|
 | GitHub Copilot | `.github/copilot-instructions.md` | Workspace files | ✅ Tested |
+| GitHub Copilot CLI | `.github/instructions/*.instructions.md` (auto-discovered) | Workspace files | ✅ Tested |
 | GitHub Copilot (3rd-party agents) | `.github/copilot-instructions.md` (shared) | Workspace files | ✅ Tested |
-| Claude Code | `CLAUDE.md` | Full filesystem | ✅ Tested |
+| Claude Code | `CLAUDE.md` + `.claude/skills/*/SKILL.md` (auto-discovered, project-scoped) | Full filesystem | ✅ Tested |
 | Codex (OpenAI) | `AGENT.md` (native) | Sandbox (limited) | ⚠️ Partial |
 | Cursor | `.cursor/rules/` | Workspace files | ⚠️ Partial |
 | Gemini CLI | `AGENT.md` (native) | Full filesystem | ⚠️ Partial |
