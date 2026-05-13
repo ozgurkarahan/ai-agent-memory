@@ -7,6 +7,18 @@ Versioning follows [Calendar Versioning](https://calver.org/) (`YYYY.0M.MICRO`) 
 
 ## [Unreleased]
 
+### Added
+
+- **`project-template/` completed to match the canonical scaffold** expected by the `new-engagement` skill. Five files added so a user who clones this repo gets a viable template: `LICENSE` (MIT), `README.md` (template-aware), `.claude/CLAUDE.md` (Claude Code project config + project-context block), `.claude/commands/status.md` (`/status` slash-command for 30-second project briefing), and `.github/instructions/end-session.instructions.md` (per-project end-session shim pointing back to the central memory wiki). The template's `.gitignore` was updated so `.claude/CLAUDE.md` and `.claude/commands/` are tracked while the rest of `.claude/` stays ignored.
+
+### Changed
+
+- **`new-engagement` skill (all three surfaces)** — replaced the internal "canonical structure source of truth: `wiki/projects/project-template.md`" + cruft warning (which referenced the maintainer's private wiki page) with a concrete **Prerequisites** block that tells public users exactly how to set up `~/projects/project-template/` from this repo's `project-template/` folder.
+
+### Fixed
+
+- **YAML in all 9 `.claude/skills/*/SKILL.md` files** — GitHub's frontmatter parser was failing with `mapping values are not allowed in this context` because unquoted descriptions contained `: ` sequences (e.g., `Trigger: '...'`, `ISO week: resolve...`). Every description is now wrapped in double quotes with internal double-quotes replaced by single quotes. Validated by parsing all 9 frontmatter blocks with PyYAML.
+
 ## [2026.05.1] — 2026-05-13
 
 Adds Claude Code as a first-class agent surface and polishes the surrounding docs.

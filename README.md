@@ -262,10 +262,20 @@ ai-agent-memory/
 │   ├── .github/
 │   └── src/
 │
-└── project-template/          # Starter template for new projects
-    ├── AGENT.md
-    ├── CLAUDE.md
+└── project-template/          # Canonical scaffold consumed by the new-engagement skill
+    ├── AGENT.md               #   - Project identity (single source of truth)
+    ├── CLAUDE.md              #   - Thin shim → "Read AGENT.md"
+    ├── README.md              #   - Human-facing template README
+    ├── LICENSE                #   - MIT
+    ├── .gitignore             #   - Tracks .claude/CLAUDE.md + .claude/commands/, ignores the rest
+    ├── .claude/
+    │   ├── CLAUDE.md          #   - Claude Code project config + project-context block
+    │   └── commands/
+    │       └── status.md      #   - /status slash-command (30-second project briefing)
     └── .github/
+        ├── copilot-instructions.md          # Copilot pointer → AGENT.md
+        └── instructions/
+            └── end-session.instructions.md  # Per-project end-session shim
 ```
 
 ---
