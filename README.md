@@ -213,7 +213,14 @@ ai-agent-memory/
 ├── bootstrap.md               # Full bootstrap instructions for any agent
 │
 ├── .github/
-│   └── copilot-instructions.md  # GitHub Copilot pointer → AGENT.md
+│   ├── copilot-instructions.md  # GitHub Copilot pointer → AGENT.md
+│   └── instructions/            # GitHub Copilot CLI skill auto-discovery
+│       └── {slug}.instructions.md
+│
+├── .claude/                     # Claude Code project-scoped surface
+│   └── skills/                  # Claude Code skill auto-discovery
+│       └── {slug}/
+│           └── SKILL.md
 │
 ├── docs/
 │   └── workflows.md           # Human-readable workflow documentation
@@ -228,10 +235,11 @@ ai-agent-memory/
 │   │   ├── workflow.md        # Global workflow rules
 │   │   └── platform.md       # Platform preferences & environment
 │   │
-│   ├── workflows/             # Layer 2: Workflow procedures
-│   │   ├── ingest.md          # 7-phase ingest pipeline
-│   │   ├── end-session.md     # 5-step end-session routine
-│   │   └── query.md           # Index-first query procedure
+│   ├── workflows/             # Layer 2: Plain-Markdown skill reference
+│   │   ├── ingest.md          # Karpathy LLM-wiki ingest pipeline
+│   │   ├── end-session.md     # End-of-session capture
+│   │   ├── query.md           # Index-first query procedure
+│   │   └── ...                # Other skills (one .md per skill)
 │   │
 │   ├── templates/             # Starter templates for new pages
 │   │   ├── project.md         # New project wiki page
