@@ -8,6 +8,27 @@
 
 Works with: **GitHub Copilot** · **Claude Code** · **Codex** · **Cursor** · **Gemini CLI** · **Aider**
 
+Every session feeds the wiki, and the wiki feeds every session — the Karpathy loop at a glance:
+
+```mermaid
+flowchart TD
+    S["Coding session — any agent, any project"] --> L["Learning moment: lesson, decision, pattern"]
+    L -->|"say 'ingest' or 'end session'"| P["Skill pipeline: classify, compile, update graph"]
+    P --> LOG["memory/log.md — chronological session log"]
+    P --> W["wiki/ — projects, domains, patterns, lessons"]
+    W --> IDX["index.md — content catalog"]
+
+    subgraph NEXT["Next session — knowledge retrieved at start"]
+        CO["GitHub Copilot"]
+        CC["Claude Code"]
+        CX["Codex"]
+        CU["Cursor"]
+    end
+
+    IDX -->|"via the AGENT.md pointer"| NEXT
+    NEXT --> S
+```
+
 ---
 
 ## Motivation
