@@ -7,6 +7,10 @@ Versioning follows [Calendar Versioning](https://calver.org/) (`YYYY.0M.MICRO`) 
 
 ## [Unreleased]
 
+### Fixed
+
+- **Bootstrap reliability for agent-only installs** — executable skills are now the first mandatory bootstrap deliverable instead of Step 8 after the wiki. The prompt is resume-safe, blocks wiki creation until all 27 skill copies pass a mandatory gate, distinguishes executable skill locations from `memory/wiki/skills/` knowledge pages, and uses a fail-closed Definition of Done that cannot report a wiki-only installation as complete. Also restores byte-identical `new-engagement` bodies across all three copies.
+
 ## [2026.05.2] — 2026-05-13
 
 Completes the public-facing setup: a fresh clone now ships a viable `project-template/` for `new-engagement`, and `bootstrap.md` installs the full **9 skills × 3 surfaces** that the rest of the repo already provides.

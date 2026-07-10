@@ -175,7 +175,6 @@ tags: [{client-tag}, {topic-tags}]
 date_created: {YYYY-MM-DD}
 date_updated: {YYYY-MM-DD}
 ---
-
 # {Topic Title}
 
 ## Summary

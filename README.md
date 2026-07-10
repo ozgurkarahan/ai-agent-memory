@@ -59,7 +59,7 @@ $EDITOR memory/agent-config/platform.md
 
 You don't need to set anything up manually. Just give [`bootstrap.md`](bootstrap.md) to your AI coding agent — it contains step-by-step instructions that the agent will follow to create the entire memory system.
 
-`bootstrap.md` is **fully self-contained** (~80 KB, no network access required). It installs all 9 skills × 3 surfaces (`.github/instructions/`, `.claude/skills/`, `memory/workflows/`) plus the optional `project-template/` scaffold consumed by `new-engagement`.
+`bootstrap.md` is **fully self-contained** (~80 KB, no network access required). It installs all 9 skills in the two native agent locations (`.github/instructions/` and `.claude/skills/`) plus an agent-neutral copy under `memory/workflows/`. Skills are installed before wiki content, and the bootstrap cannot report success until its Definition of Done confirms all 27 skill files.
 
 > **Maintainers:** `bootstrap.md` is regenerated from the canonical skill bodies + `project-template/` files by [`scripts/regenerate-bootstrap.py`](scripts/regenerate-bootstrap.py). Run `python scripts/regenerate-bootstrap.py` after any skill or template change.
 
@@ -67,9 +67,9 @@ You don't need to set anything up manually. Just give [`bootstrap.md`](bootstrap
 
 1. Open a new folder in VS Code (this will become your `memory/` project)
 2. Open Copilot Chat (Ctrl+I) in agent mode
-3. Say: *"Follow the instructions in bootstrap.md to set up a persistent memory wiki"* and attach the file
-4. The agent creates the full directory structure, schema, workflows, templates, and example content
-5. Verify the structure, then commit
+3. Say: *"Execute bootstrap.md completely in this folder. Install the skills first, continue until the Definition of Done passes, and do not report success for a wiki-only installation."* and attach the file
+4. The agent creates and verifies the skill surfaces before creating the wiki, templates, and root instruction files
+5. Confirm the final report says `SETUP COMPLETE`, then restart the agent so it discovers the new skills
 
 **With any other agent (Claude Code, Codex, Cursor…):**
 
@@ -168,7 +168,7 @@ This same pattern works for every agent — each reads its own config file, but 
 
 ## How It Works
 
-Nine skills drive the system. The three core skills below are the heart of the wiki workflow; six more (`lint`, `plan-week`, `close-week`, `project-status`, `review-sessions`, `new-engagement`) ship alongside them in every supported surface. Agents discover all nine through one of three parallel locations — `.github/instructions/` (GitHub Copilot CLI), `.claude/skills/` (Claude Code), or `memory/workflows/` (human-readable canonical source) — see [CONTRIBUTING.md](CONTRIBUTING.md) for the per-surface frontmatter contract.
+Nine skills drive the system. The three core skills below are the heart of the wiki workflow; six more (`lint`, `plan-week`, `close-week`, `project-status`, `review-sessions`, `new-engagement`) ship alongside them. Agents discover all nine through two native locations — `.github/instructions/` for GitHub Copilot CLI and `.claude/skills/` for Claude Code. `memory/workflows/` is the agent-neutral reference copy used by other agents through `AGENT.md`. See [CONTRIBUTING.md](CONTRIBUTING.md) for the per-copy frontmatter contract.
 
 ### 1. Ingest — Add knowledge to the wiki
 

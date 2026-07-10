@@ -96,15 +96,27 @@ HEADER = """# AI Agent Memory — Bootstrap Prompt
 
 You are setting up a **persistent memory system** for an AI coding agent. Follow each step below. Create every file with the exact content provided. Do not skip steps.
 
-This bootstrap installs **9 skills** across **3 surfaces** (tri-surface convention) so the same workflows work whether the user runs GitHub Copilot CLI, Claude Code, or any other agent that reads `.github/instructions/`.
+This bootstrap installs **9 skills across 2 native agent surfaces**, plus an agent-neutral Markdown copy:
 
-| Surface | Path | Read by |
+| Copy | Path | Read by |
 |---|---|---|
-| GitHub Copilot CLI instructions | `.github/instructions/{slug}.instructions.md` | GitHub Copilot CLI (auto-loaded via `applyTo: "**"`) |
-| Claude Code skills | `.claude/skills/{slug}/SKILL.md` | Claude Code (auto-routed by `description:` field) |
-| Plain-Markdown workflows | `memory/workflows/{slug}.md` | Any agent — also serves as canonical reference |
+| Native GitHub Copilot CLI instructions | `.github/instructions/{slug}.instructions.md` | GitHub Copilot CLI (auto-loaded via `applyTo: "**"`) |
+| Native Claude Code skills | `.claude/skills/{slug}/SKILL.md` | Claude Code (auto-routed by `description:` field) |
+| Agent-neutral workflows | `memory/workflows/{slug}.md` | Any agent that follows `AGENT.md`; portable reference copy |
 
-The **body** of each skill is identical across the 3 surfaces. Only the YAML frontmatter differs.
+The **body** of each skill is identical across the 3 copies. Only the YAML frontmatter differs.
+
+## Non-negotiable execution contract
+
+This is an **installation task**, not a document to summarize. Work directly in the current folder unless the user supplied another target.
+
+1. Install the executable skill surfaces first. A wiki without `.github/instructions/` and `.claude/skills/` is an incomplete installation.
+2. Complete each mandatory gate before continuing. Do not skip a failed gate.
+3. Be resume-safe: inspect existing files first, keep files that already match, and create or repair every missing or incomplete file.
+4. Do not report success until the Definition of Done in Step 12 passes.
+5. If interrupted, the next run starts at the first failed gate rather than recreating the wiki from scratch.
+
+`memory/wiki/skills/` contains knowledge *about* skills. It does **not** make skills executable. The native executable locations are `.github/instructions/` and `.claude/skills/`.
 
 ---
 
@@ -118,7 +130,7 @@ project-root/
 ├── CLAUDE.md                                   # Pointer to AGENT.md (Step 10)
 ├── .github/
 │   ├── copilot-instructions.md                 # Pointer to AGENT.md (Step 10)
-│   └── instructions/                           # GitHub Copilot CLI surface (Step 8)
+│   └── instructions/                           # GitHub Copilot CLI surface (Step 2)
 │       ├── ingest.instructions.md
 │       ├── end-session.instructions.md
 │       ├── query.instructions.md
@@ -129,7 +141,7 @@ project-root/
 │       ├── review-sessions.instructions.md
 │       └── new-engagement.instructions.md
 ├── .claude/
-│   └── skills/                                 # Claude Code surface (Step 8)
+│   └── skills/                                 # Claude Code surface (Step 2)
 │       ├── ingest/SKILL.md
 │       ├── end-session/SKILL.md
 │       ├── query/SKILL.md
@@ -140,14 +152,14 @@ project-root/
 │       ├── review-sessions/SKILL.md
 │       └── new-engagement/SKILL.md
 ├── memory/
-│   ├── schema.md                               # Wiki governance (Step 2)
-│   ├── index.md                                # Content catalog (Step 3)
-│   ├── log.md                                  # Append-only audit log (Step 4)
-│   ├── glossary.md                             # Canonical terms (Step 5)
+│   ├── schema.md                               # Wiki governance (Step 3)
+│   ├── index.md                                # Content catalog (Step 4)
+│   ├── log.md                                  # Append-only audit log (Step 5)
+│   ├── glossary.md                             # Canonical terms (Step 6)
 │   ├── agent-config/
-│   │   ├── workflow.md                         # Cross-project rules (Step 6)
-│   │   └── platform.md                         # Platform & preferences (Step 7)
-│   ├── workflows/                              # Plain-Markdown skill bodies (Step 8)
+│   │   ├── workflow.md                         # Cross-project rules (Step 7)
+│   │   └── platform.md                         # Platform & preferences (Step 8)
+│   ├── workflows/                              # Agent-neutral skill bodies (Step 2)
 │   │   ├── ingest.md
 │   │   ├── end-session.md
 │   │   ├── query.md
@@ -185,7 +197,7 @@ Also create an empty `memory/ops/activity.jsonl` (touch the file so `plan-week`/
 
 
 def section_schema() -> str:
-    return """### Step 2: Create `memory/schema.md`
+    return """### Step 3: Create `memory/schema.md`
 
 ```markdown
 ---
@@ -268,7 +280,7 @@ Main content with [[wikilinks]] to related pages.
 
 
 def section_index() -> str:
-    return """### Step 3: Create `memory/index.md`
+    return """### Step 4: Create `memory/index.md`
 
 ```markdown
 ---
@@ -339,7 +351,7 @@ This is the master catalog of all wiki pages, grouped by category.
 
 
 def section_log() -> str:
-    return """### Step 4: Create `memory/log.md`
+    return """### Step 5: Create `memory/log.md`
 
 ```markdown
 ---
@@ -367,7 +379,7 @@ Types: `INGEST`, `UPDATE`, `QUERY`, `CLOSE-WEEK`, `LINT`
 
 
 def section_glossary() -> str:
-    return """### Step 5: Create `memory/glossary.md`
+    return """### Step 6: Create `memory/glossary.md`
 
 ```markdown
 ---
@@ -393,7 +405,7 @@ Canonical terms used across the wiki. One-line definitions. Update when ingestin
 
 
 def section_agent_workflow() -> str:
-    return """### Step 6: Create `memory/agent-config/workflow.md`
+    return """### Step 7: Create `memory/agent-config/workflow.md`
 
 ```markdown
 ---
@@ -501,7 +513,7 @@ Lessons learned and technical reference are centralized in `memory/wiki/projects
 
 
 def section_agent_platform() -> str:
-    return """### Step 7: Create `memory/agent-config/platform.md`
+    return """### Step 8: Create `memory/agent-config/platform.md`
 
 Ask the user what platform they're on (OS, language runtimes, cloud provider). If the user doesn't specify, create sensible defaults:
 
@@ -537,19 +549,22 @@ Shared domain knowledge files are stored in `agent-config/knowledge/` — consul
 
 
 def section_skills() -> str:
-    """Generate Step 8 — all 9 skills × 3 surfaces.
+    """Generate Step 2 — all 9 skills × 3 copies.
 
     Strategy: emit each skill body once inside a fenced block, then provide
     instructions to save it to 3 paths with 3 frontmatter wrappers.
     """
     parts = [
-        "### Step 8: Create the 9 skill files (tri-surface)\n",
+        "### Step 2: Install all 9 skills before creating wiki content\n",
+        "**This is the first mandatory deliverable. Do not continue to Step 3 until its gate passes.**\n",
         "For each skill below, create **3 files** containing the **same body** but **different frontmatter**:\n",
         "1. `.github/instructions/{slug}.instructions.md` — frontmatter: `---\\napplyTo: \"**\"\\n---`",
         "2. `.claude/skills/{slug}/SKILL.md` — frontmatter: `---\\nname: {slug}\\ndescription: <see per-skill description below>\\n---`",
         "3. `memory/workflows/{slug}.md` — frontmatter: `---\\napplyTo: \"**\"\\n---`",
         "",
-        "The body is byte-identical across all 3 files. Only the frontmatter differs.",
+        "Create each set of 3 files immediately before moving to the next skill. The body is byte-identical across all 3 files; only the frontmatter differs.",
+        "",
+        "If a destination file already exists, verify its frontmatter and body. Keep it if correct; otherwise repair it. This makes interrupted installs safe to resume.",
         "",
         "---\n",
     ]
@@ -566,6 +581,25 @@ def section_skills() -> str:
         parts.append(f"**Body** (save to all 3 paths — `.github/instructions/{slug}.instructions.md`, `.claude/skills/{slug}/SKILL.md`, `memory/workflows/{slug}.md`):\n")
         parts.append(fence(body, "markdown"))
         parts.append("\n---\n")
+
+    parts.extend(
+        [
+            "#### Mandatory Gate A: executable skills are installed\n",
+            "Before creating any wiki content, inspect the filesystem and prove all of the following:\n",
+            "",
+            "- `.github/instructions/` contains the 9 generated `*.instructions.md` files.",
+            "- `.claude/skills/` contains the 9 generated `{slug}/SKILL.md` files.",
+            "- `memory/workflows/` contains the 9 generated `{slug}.md` files.",
+            "- Every native file has the required frontmatter.",
+            "- After stripping frontmatter, each skill's body matches across all 3 copies.",
+            "",
+            "Expected counts: **9 Copilot + 9 Claude + 9 agent-neutral = 27 files**.",
+            "",
+            "If any check fails, stop here and repair the skill installation. **Do not proceed with a wiki-only installation.**",
+            "",
+            "---\n",
+        ]
+    )
 
     return "\n".join(parts) + "\n"
 
@@ -731,9 +765,15 @@ def section_project_template() -> str:
 def section_verification() -> str:
     return """### Step 12: Verification
 
-Run a verification checklist:
+## Definition of Done
+
+The setup is complete only when every required item below passes. Inspect the files; do not mark boxes based on intended work.
 
 ```
+[ ] SKILL GATE: 9 Copilot instruction files exist under .github/instructions/
+[ ] SKILL GATE: 9 Claude SKILL.md files exist under .claude/skills/
+[ ] SKILL GATE: 9 agent-neutral workflow files exist under memory/workflows/
+[ ] SKILL GATE: all 9 skill bodies match across the 3 copies after frontmatter is removed
 [ ] memory/schema.md exists with YAML frontmatter
 [ ] memory/index.md exists with category sections
 [ ] memory/log.md exists with INIT entry
@@ -745,18 +785,22 @@ Run a verification checklist:
 [ ] memory/wiki/{projects,domains,patterns,lessons,skills,agents,tools,_queries}/ directories exist
 [ ] memory/raw/ directory exists
 [ ] memory/ops/weekly/ directory exists and memory/ops/activity.jsonl exists (empty)
-[ ] For each of the 9 skills, all 3 surfaces exist:
-    [ ] .github/instructions/{slug}.instructions.md   (with applyTo: "**" frontmatter)
-    [ ] .claude/skills/{slug}/SKILL.md                (with name + description frontmatter)
-    [ ] memory/workflows/{slug}.md                    (with applyTo: "**" frontmatter)
-    [ ] Body is byte-identical across all 3 files
 [ ] project-template/ scaffold exists with 9 canonical files (if Step 11 was completed)
 [ ] AGENT.md exists at project root and references memory/agent-config/workflow.md + lists all 9 skills
 [ ] CLAUDE.md exists at project root and points to AGENT.md
 [ ] .github/copilot-instructions.md exists at project root and points to AGENT.md
 ```
 
-Report the checklist results to the user.
+### Required completion report
+
+Report one of these outcomes:
+
+- `SETUP COMPLETE — 9/9 skills installed for Copilot CLI and Claude Code; 27/27 skill files present; wiki ready.`
+- `SETUP INCOMPLETE — <failed checks and missing paths>.` Then continue repairing the failed checks; do not stop at this report unless blocked by permissions or missing tool access.
+
+Do not call a directory under `memory/wiki/skills/` an installed skill surface. It is wiki content only.
+
+Newly created skills may require a **new agent session** before GitHub Copilot CLI or Claude Code discovers them. File verification happens now; discovery is smoke-tested after restarting the agent in this folder.
 
 ---
 """
@@ -811,13 +855,13 @@ def main() -> None:
 
     out = []
     out.append(HEADER)
+    out.append(section_skills())
     out.append(section_schema())
     out.append(section_index())
     out.append(section_log())
     out.append(section_glossary())
     out.append(section_agent_workflow())
     out.append(section_agent_platform())
-    out.append(section_skills())
     out.append(section_templates())
     out.append(section_root_files())
     out.append(section_project_template())

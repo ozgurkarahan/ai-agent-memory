@@ -12,15 +12,27 @@
 
 You are setting up a **persistent memory system** for an AI coding agent. Follow each step below. Create every file with the exact content provided. Do not skip steps.
 
-This bootstrap installs **9 skills** across **3 surfaces** (tri-surface convention) so the same workflows work whether the user runs GitHub Copilot CLI, Claude Code, or any other agent that reads `.github/instructions/`.
+This bootstrap installs **9 skills across 2 native agent surfaces**, plus an agent-neutral Markdown copy:
 
-| Surface | Path | Read by |
+| Copy | Path | Read by |
 |---|---|---|
-| GitHub Copilot CLI instructions | `.github/instructions/{slug}.instructions.md` | GitHub Copilot CLI (auto-loaded via `applyTo: "**"`) |
-| Claude Code skills | `.claude/skills/{slug}/SKILL.md` | Claude Code (auto-routed by `description:` field) |
-| Plain-Markdown workflows | `memory/workflows/{slug}.md` | Any agent — also serves as canonical reference |
+| Native GitHub Copilot CLI instructions | `.github/instructions/{slug}.instructions.md` | GitHub Copilot CLI (auto-loaded via `applyTo: "**"`) |
+| Native Claude Code skills | `.claude/skills/{slug}/SKILL.md` | Claude Code (auto-routed by `description:` field) |
+| Agent-neutral workflows | `memory/workflows/{slug}.md` | Any agent that follows `AGENT.md`; portable reference copy |
 
-The **body** of each skill is identical across the 3 surfaces. Only the YAML frontmatter differs.
+The **body** of each skill is identical across the 3 copies. Only the YAML frontmatter differs.
+
+## Non-negotiable execution contract
+
+This is an **installation task**, not a document to summarize. Work directly in the current folder unless the user supplied another target.
+
+1. Install the executable skill surfaces first. A wiki without `.github/instructions/` and `.claude/skills/` is an incomplete installation.
+2. Complete each mandatory gate before continuing. Do not skip a failed gate.
+3. Be resume-safe: inspect existing files first, keep files that already match, and create or repair every missing or incomplete file.
+4. Do not report success until the Definition of Done in Step 12 passes.
+5. If interrupted, the next run starts at the first failed gate rather than recreating the wiki from scratch.
+
+`memory/wiki/skills/` contains knowledge *about* skills. It does **not** make skills executable. The native executable locations are `.github/instructions/` and `.claude/skills/`.
 
 ---
 
@@ -34,7 +46,7 @@ project-root/
 ├── CLAUDE.md                                   # Pointer to AGENT.md (Step 10)
 ├── .github/
 │   ├── copilot-instructions.md                 # Pointer to AGENT.md (Step 10)
-│   └── instructions/                           # GitHub Copilot CLI surface (Step 8)
+│   └── instructions/                           # GitHub Copilot CLI surface (Step 2)
 │       ├── ingest.instructions.md
 │       ├── end-session.instructions.md
 │       ├── query.instructions.md
@@ -45,7 +57,7 @@ project-root/
 │       ├── review-sessions.instructions.md
 │       └── new-engagement.instructions.md
 ├── .claude/
-│   └── skills/                                 # Claude Code surface (Step 8)
+│   └── skills/                                 # Claude Code surface (Step 2)
 │       ├── ingest/SKILL.md
 │       ├── end-session/SKILL.md
 │       ├── query/SKILL.md
@@ -56,14 +68,14 @@ project-root/
 │       ├── review-sessions/SKILL.md
 │       └── new-engagement/SKILL.md
 ├── memory/
-│   ├── schema.md                               # Wiki governance (Step 2)
-│   ├── index.md                                # Content catalog (Step 3)
-│   ├── log.md                                  # Append-only audit log (Step 4)
-│   ├── glossary.md                             # Canonical terms (Step 5)
+│   ├── schema.md                               # Wiki governance (Step 3)
+│   ├── index.md                                # Content catalog (Step 4)
+│   ├── log.md                                  # Append-only audit log (Step 5)
+│   ├── glossary.md                             # Canonical terms (Step 6)
 │   ├── agent-config/
-│   │   ├── workflow.md                         # Cross-project rules (Step 6)
-│   │   └── platform.md                         # Platform & preferences (Step 7)
-│   ├── workflows/                              # Plain-Markdown skill bodies (Step 8)
+│   │   ├── workflow.md                         # Cross-project rules (Step 7)
+│   │   └── platform.md                         # Platform & preferences (Step 8)
+│   ├── workflows/                              # Agent-neutral skill bodies (Step 2)
 │   │   ├── ingest.md
 │   │   ├── end-session.md
 │   │   ├── query.md
@@ -98,341 +110,9 @@ Also create an empty `memory/ops/activity.jsonl` (touch the file so `plan-week`/
 
 ---
 
-### Step 2: Create `memory/schema.md`
+### Step 2: Install all 9 skills before creating wiki content
 
-```markdown
----
-title: Wiki Schema
-category: meta
-date_created: {{today}}
-date_updated: {{today}}
----
-
-# Wiki Schema
-
-This document governs how the wiki is structured. The LLM reads this to understand conventions, categories, and workflows.
-
-## Category Taxonomy
-
-| Category | Folder | Description | Example Pages |
-|----------|--------|-------------|---------------|
-| Projects | `wiki/projects/` | Per-project knowledge: architecture, lessons, technical reference | `my-api`, `mobile-app` |
-| Domains | `wiki/domains/` | Technical domain deep-dives | `authentication`, `kubernetes`, `react` |
-| Patterns | `wiki/patterns/` | Reusable architecture & design patterns | `retry-with-backoff`, `event-sourcing` |
-| Lessons | `wiki/lessons/` | Consolidated debugging history & gotchas | `encoding-gotchas`, `deployment-failures` |
-| Skills | `wiki/skills/` | Triggerable workflows (durable knowledge of the skill itself) | `ingest`, `query` |
-| Agents | `wiki/agents/` | Role-based executors / subagents | `code-review`, `research` |
-| Tools | `wiki/tools/` | Products, CLIs, SDKs, APIs, services | `gh-cli`, `playwright-mcp` |
-| Queries | `wiki/_queries/` | Synthesized answers to past questions | `how-to-deploy-X` |
-| Agent Config | `agent-config/` | Cross-project AI agent configuration | `workflow`, `platform` |
-
-## Article Format
-
-Every wiki page has YAML frontmatter + markdown body:
-
-~~~markdown
----
-title: Page Title
-category: projects|domains|patterns|lessons|skills|agents|tools|queries
-tags: [tag1, tag2, tag3]
-source_docs: []
-date_created: YYYY-MM-DD
-date_updated: YYYY-MM-DD
----
-
-# Page Title
-
-## Summary
-One-paragraph overview.
-
-## Content
-Main content with [[wikilinks]] to related pages.
-
-## Related
-- [[related-page-1]]
-- [[related-page-2]]
-
-## Sources
-- Source documents, URLs, or references
-~~~
-
-## Naming Conventions
-
-- **File names**: lowercase, hyphenated (`my-project.md`, not `My Project.md`)
-- **Folders**: lowercase, hyphenated
-- **Category in frontmatter**, not in path (allows migration without renaming)
-- **Derive filename from content**, not from LLM-generated titles (deterministic)
-
-## Wikilink Syntax
-
-- `[[page-name]]` — link to another wiki page
-- `[[page-name|Display Text]]` — link with custom display text
-- `[[page-name#Section]]` — link to a specific section
-- Pages are resolved by filename (shortest unique match)
-
-## Index Files
-
-- **`index.md`** (root) — master content catalog, grouped by category, with counts
-- The LLM updates indexes on every ingest
-```
-
----
-
-### Step 3: Create `memory/index.md`
-
-```markdown
----
-title: Wiki Index
-category: meta
-date_created: {{today}}
-date_updated: {{today}}
----
-
-# Wiki Content Catalog
-
-This is the master catalog of all wiki pages, grouped by category.
-
-**Always update this file when adding or removing pages.** The LLM reads this file to find pages by topic.
-
-## Projects (0 articles)
-
-<!-- Per-project knowledge: architecture, lessons, technical reference -->
-
-## Domains (0 articles)
-
-<!-- Technical domain deep-dives -->
-
-## Patterns (0 articles)
-
-<!-- Reusable architecture & design patterns -->
-
-## Lessons (0 articles)
-
-<!-- Consolidated debugging history & gotchas -->
-
-## Skills (0 articles)
-
-<!-- Durable knowledge about triggerable workflows -->
-
-## Agents (0 articles)
-
-<!-- Role-based executors / subagents -->
-
-## Tools (0 articles)
-
-<!-- Products, CLIs, SDKs, APIs, services -->
-
-## Queries (0 articles)
-
-<!-- Synthesized answers to past questions -->
-
-## Agent Config
-
-- [[workflow]] — Cross-project workflow rules
-- [[platform]] — Platform & environment preferences
-
-## Skills (workflows installed)
-
-- [[ingest]] — Ingest a source into the wiki
-- [[end-session]] — Wrap up a coding session
-- [[query]] — Answer a question from the wiki
-- [[lint]] — Run wiki health checks
-- [[plan-week]] — Draft the Monday plan
-- [[close-week]] — Friday review + activity aggregation
-- [[project-status]] — 30-sec project briefing
-- [[review-sessions]] — Analyse past sessions for improvements
-- [[new-engagement]] — Scaffold a new client engagement
-```
-
----
-
-### Step 4: Create `memory/log.md`
-
-```markdown
----
-title: Activity Log
-category: meta
-date_created: {{today}}
-date_updated: {{today}}
----
-
-# Activity Log
-
-Append-only log of all wiki changes. Every ingest, update, or significant edit gets a line.
-
-Format: `- **YYYY-MM-DDTHH:MM** | TYPE | "description" | metadata`
-
-Types: `INGEST`, `UPDATE`, `QUERY`, `CLOSE-WEEK`, `LINT`
-
-## Log
-
-- **{{today}}T00:00** | INIT | "Memory wiki bootstrapped" | bootstrap: ai-agent-memory
-```
-
----
-
-### Step 5: Create `memory/glossary.md`
-
-```markdown
----
-title: Glossary
-category: meta
-date_created: {{today}}
-date_updated: {{today}}
----
-
-# Glossary
-
-Canonical terms used across the wiki. One-line definitions. Update when ingesting new acronyms, product names, or domain-specific jargon.
-
-## Terms
-
-<!-- Add entries alphabetically:
-- **Term** — one-line definition. See [[related-page]].
--->
-```
-
----
-
-### Step 6: Create `memory/agent-config/workflow.md`
-
-```markdown
----
-title: Cross-Project Workflow Rules
-category: agent-config
-date_created: {{today}}
-date_updated: {{today}}
----
-
-# Cross-Project Workflow Rules
-
-These rules apply to all projects and all AI coding assistant sessions.
-
-> Each project has an `AGENT.md` in its root with project-specific instructions.
-> Lessons learned and technical reference live in the central memory wiki at `memory/`.
-
-## Rules
-
-### 1. Plan Before Coding
-- **For any task with 3+ expected steps, outline the approach before writing code.**
-- Define what "done" looks like — including acceptance criteria and verification steps.
-- List the files you expect to change and why.
-- Get approval before implementing.
-
-### 2. Verify Before Done
-- Never mark a task complete without proving it works.
-- Run tests, check logs, demonstrate correctness.
-- Diff behavior between before and after when relevant.
-
-### 3. Learn From Mistakes
-- After ANY correction from the user: update the project's wiki page at `memory/wiki/projects/{project-name}.md` — append to "## Lessons Learned".
-- Write rules that prevent the same mistake from recurring.
-- Review the project's wiki page at session start.
-
-### 4. No Blind Retries
-- **Never retry a command that failed with a non-transient error.** Diagnose the root cause instead.
-- Non-transient: validation errors, 401, 403, permission denied.
-- Transient (ok to retry once): network timeout, 429, 503, connection reset.
-- After 2 failures on the same command: stop, explain the issue, ask the user.
-
-### 5. Keep It Simple
-- Don't add features, refactor code, or make improvements beyond what was asked.
-- For non-trivial changes: pause and ask "is there a more elegant way?"
-- If a fix feels hacky: step back and implement the clean solution.
-
-## Session Routine
-
-**Start of session:**
-- Read the project's wiki page at `memory/wiki/projects/{project-name}.md` — especially "## Lessons Learned".
-- Review any active work notes or prior session context.
-
-**End of session:**
-- Capture any new lessons in the project's wiki page ("## Lessons Learned").
-- Note what was done and what's next.
-- Follow the end-session skill (`memory/workflows/end-session.md` or trigger word "end session").
-
-**Wiki compounding (when significant work was done):**
-- If a reusable pattern was discovered, create or update a page in `memory/wiki/patterns/`.
-- If a domain gotcha was learned, update the relevant `memory/wiki/domains/*.md` page.
-- Update `memory/log.md` with: `- **{timestamp}** | UPDATE | "{what changed}" | project: {name}`
-
-## Available Skills
-
-The following skills are installed via tri-surface (both GitHub Copilot CLI and Claude Code can trigger them):
-
-| Skill | Trigger | Purpose |
-|---|---|---|
-| `ingest` | "ingest X" | Compile a source into a wiki page (7-phase pipeline) |
-| `end-session` | "end session", "wrap up" | Capture lessons, update project page, git check |
-| `query` | "query X", "what do we know about X" | Answer a question with `[[wikilinks]]` |
-| `lint` | "lint", "health check" | Run wiki health checks, report findings |
-| `plan-week` | "plan week", "Monday plan" | Draft the ISO week's plan |
-| `close-week` | "close week", "Friday review" | Aggregate the week's activity, freeze the file |
-| `project-status` | "project status" (from inside a child project) | 30-sec situational briefing |
-| `review-sessions` | "review sessions" | Analyse past sessions for workflow improvements |
-| `new-engagement` | "new engagement <Client> — <topic> (format)" | Scaffold a new client engagement from `project-template/` |
-
-## Project Structure Convention
-
-Every project scaffolded by `new-engagement` (or created manually) has this shape:
-
-```
-project-root/
-├── AGENT.md                                            # MAIN — overview, env, commands, workflow, refs
-├── CLAUDE.md                                           # Thin shim → "Read AGENT.md"
-├── README.md                                           # Human-facing
-├── LICENSE                                             # Open-source license
-├── .gitignore
-├── .github/
-│   ├── copilot-instructions.md                         # GitHub Copilot CLI shim → AGENT.md
-│   └── instructions/
-│       └── end-session.instructions.md                 # Per-project end-session shim
-├── .claude/
-│   ├── CLAUDE.md                                       # Claude Code project config
-│   └── commands/
-│       └── status.md                                   # /status slash-command (30-sec briefing)
-└── (format-specific folders: slides/, demos/, exercises/, docs/...)
-```
-
-Lessons learned and technical reference are centralized in `memory/wiki/projects/{project-name}.md` — not duplicated in the repo.
-```
-
----
-
-### Step 7: Create `memory/agent-config/platform.md`
-
-Ask the user what platform they're on (OS, language runtimes, cloud provider). If the user doesn't specify, create sensible defaults:
-
-```markdown
----
-title: Platform & Preferences
-category: agent-config
-tags: [platform, environment]
-date_created: {{today}}
-date_updated: {{today}}
----
-
-# Platform & Preferences
-
-## Environment
-
-- OS: (ask user, or detect from current environment)
-- Primary language(s): (ask user)
-- Cloud provider: (ask user, or "none" if local-only)
-
-## Platform Gotchas
-
-<!-- Add platform-specific gotchas as you discover them -->
-<!-- Example: "Always use encoding='utf-8' for subprocess on Windows" -->
-
-## Cross-Project Knowledge
-
-Shared domain knowledge files are stored in `agent-config/knowledge/` — consult when working in the relevant domain.
-```
-
----
-
-### Step 8: Create the 9 skill files (tri-surface)
+**This is the first mandatory deliverable. Do not continue to Step 3 until its gate passes.**
 
 For each skill below, create **3 files** containing the **same body** but **different frontmatter**:
 
@@ -440,7 +120,9 @@ For each skill below, create **3 files** containing the **same body** but **diff
 2. `.claude/skills/{slug}/SKILL.md` — frontmatter: `---\nname: {slug}\ndescription: <see per-skill description below>\n---`
 3. `memory/workflows/{slug}.md` — frontmatter: `---\napplyTo: "**"\n---`
 
-The body is byte-identical across all 3 files. Only the frontmatter differs.
+Create each set of 3 files immediately before moving to the next skill. The body is byte-identical across all 3 files; only the frontmatter differs.
+
+If a destination file already exists, verify its frontmatter and body. Keep it if correct; otherwise repair it. This makes interrupted installs safe to resume.
 
 ---
 
@@ -1373,6 +1055,357 @@ copilot --allow-all-tools -p "Research the latest agentic AI capabilities, then 
 
 ---
 
+#### Mandatory Gate A: executable skills are installed
+
+Before creating any wiki content, inspect the filesystem and prove all of the following:
+
+
+- `.github/instructions/` contains the 9 generated `*.instructions.md` files.
+- `.claude/skills/` contains the 9 generated `{slug}/SKILL.md` files.
+- `memory/workflows/` contains the 9 generated `{slug}.md` files.
+- Every native file has the required frontmatter.
+- After stripping frontmatter, each skill's body matches across all 3 copies.
+
+Expected counts: **9 Copilot + 9 Claude + 9 agent-neutral = 27 files**.
+
+If any check fails, stop here and repair the skill installation. **Do not proceed with a wiki-only installation.**
+
+---
+
+
+### Step 3: Create `memory/schema.md`
+
+```markdown
+---
+title: Wiki Schema
+category: meta
+date_created: {{today}}
+date_updated: {{today}}
+---
+
+# Wiki Schema
+
+This document governs how the wiki is structured. The LLM reads this to understand conventions, categories, and workflows.
+
+## Category Taxonomy
+
+| Category | Folder | Description | Example Pages |
+|----------|--------|-------------|---------------|
+| Projects | `wiki/projects/` | Per-project knowledge: architecture, lessons, technical reference | `my-api`, `mobile-app` |
+| Domains | `wiki/domains/` | Technical domain deep-dives | `authentication`, `kubernetes`, `react` |
+| Patterns | `wiki/patterns/` | Reusable architecture & design patterns | `retry-with-backoff`, `event-sourcing` |
+| Lessons | `wiki/lessons/` | Consolidated debugging history & gotchas | `encoding-gotchas`, `deployment-failures` |
+| Skills | `wiki/skills/` | Triggerable workflows (durable knowledge of the skill itself) | `ingest`, `query` |
+| Agents | `wiki/agents/` | Role-based executors / subagents | `code-review`, `research` |
+| Tools | `wiki/tools/` | Products, CLIs, SDKs, APIs, services | `gh-cli`, `playwright-mcp` |
+| Queries | `wiki/_queries/` | Synthesized answers to past questions | `how-to-deploy-X` |
+| Agent Config | `agent-config/` | Cross-project AI agent configuration | `workflow`, `platform` |
+
+## Article Format
+
+Every wiki page has YAML frontmatter + markdown body:
+
+~~~markdown
+---
+title: Page Title
+category: projects|domains|patterns|lessons|skills|agents|tools|queries
+tags: [tag1, tag2, tag3]
+source_docs: []
+date_created: YYYY-MM-DD
+date_updated: YYYY-MM-DD
+---
+
+# Page Title
+
+## Summary
+One-paragraph overview.
+
+## Content
+Main content with [[wikilinks]] to related pages.
+
+## Related
+- [[related-page-1]]
+- [[related-page-2]]
+
+## Sources
+- Source documents, URLs, or references
+~~~
+
+## Naming Conventions
+
+- **File names**: lowercase, hyphenated (`my-project.md`, not `My Project.md`)
+- **Folders**: lowercase, hyphenated
+- **Category in frontmatter**, not in path (allows migration without renaming)
+- **Derive filename from content**, not from LLM-generated titles (deterministic)
+
+## Wikilink Syntax
+
+- `[[page-name]]` — link to another wiki page
+- `[[page-name|Display Text]]` — link with custom display text
+- `[[page-name#Section]]` — link to a specific section
+- Pages are resolved by filename (shortest unique match)
+
+## Index Files
+
+- **`index.md`** (root) — master content catalog, grouped by category, with counts
+- The LLM updates indexes on every ingest
+```
+
+---
+
+### Step 4: Create `memory/index.md`
+
+```markdown
+---
+title: Wiki Index
+category: meta
+date_created: {{today}}
+date_updated: {{today}}
+---
+
+# Wiki Content Catalog
+
+This is the master catalog of all wiki pages, grouped by category.
+
+**Always update this file when adding or removing pages.** The LLM reads this file to find pages by topic.
+
+## Projects (0 articles)
+
+<!-- Per-project knowledge: architecture, lessons, technical reference -->
+
+## Domains (0 articles)
+
+<!-- Technical domain deep-dives -->
+
+## Patterns (0 articles)
+
+<!-- Reusable architecture & design patterns -->
+
+## Lessons (0 articles)
+
+<!-- Consolidated debugging history & gotchas -->
+
+## Skills (0 articles)
+
+<!-- Durable knowledge about triggerable workflows -->
+
+## Agents (0 articles)
+
+<!-- Role-based executors / subagents -->
+
+## Tools (0 articles)
+
+<!-- Products, CLIs, SDKs, APIs, services -->
+
+## Queries (0 articles)
+
+<!-- Synthesized answers to past questions -->
+
+## Agent Config
+
+- [[workflow]] — Cross-project workflow rules
+- [[platform]] — Platform & environment preferences
+
+## Skills (workflows installed)
+
+- [[ingest]] — Ingest a source into the wiki
+- [[end-session]] — Wrap up a coding session
+- [[query]] — Answer a question from the wiki
+- [[lint]] — Run wiki health checks
+- [[plan-week]] — Draft the Monday plan
+- [[close-week]] — Friday review + activity aggregation
+- [[project-status]] — 30-sec project briefing
+- [[review-sessions]] — Analyse past sessions for improvements
+- [[new-engagement]] — Scaffold a new client engagement
+```
+
+---
+
+### Step 5: Create `memory/log.md`
+
+```markdown
+---
+title: Activity Log
+category: meta
+date_created: {{today}}
+date_updated: {{today}}
+---
+
+# Activity Log
+
+Append-only log of all wiki changes. Every ingest, update, or significant edit gets a line.
+
+Format: `- **YYYY-MM-DDTHH:MM** | TYPE | "description" | metadata`
+
+Types: `INGEST`, `UPDATE`, `QUERY`, `CLOSE-WEEK`, `LINT`
+
+## Log
+
+- **{{today}}T00:00** | INIT | "Memory wiki bootstrapped" | bootstrap: ai-agent-memory
+```
+
+---
+
+### Step 6: Create `memory/glossary.md`
+
+```markdown
+---
+title: Glossary
+category: meta
+date_created: {{today}}
+date_updated: {{today}}
+---
+
+# Glossary
+
+Canonical terms used across the wiki. One-line definitions. Update when ingesting new acronyms, product names, or domain-specific jargon.
+
+## Terms
+
+<!-- Add entries alphabetically:
+- **Term** — one-line definition. See [[related-page]].
+-->
+```
+
+---
+
+### Step 7: Create `memory/agent-config/workflow.md`
+
+```markdown
+---
+title: Cross-Project Workflow Rules
+category: agent-config
+date_created: {{today}}
+date_updated: {{today}}
+---
+
+# Cross-Project Workflow Rules
+
+These rules apply to all projects and all AI coding assistant sessions.
+
+> Each project has an `AGENT.md` in its root with project-specific instructions.
+> Lessons learned and technical reference live in the central memory wiki at `memory/`.
+
+## Rules
+
+### 1. Plan Before Coding
+- **For any task with 3+ expected steps, outline the approach before writing code.**
+- Define what "done" looks like — including acceptance criteria and verification steps.
+- List the files you expect to change and why.
+- Get approval before implementing.
+
+### 2. Verify Before Done
+- Never mark a task complete without proving it works.
+- Run tests, check logs, demonstrate correctness.
+- Diff behavior between before and after when relevant.
+
+### 3. Learn From Mistakes
+- After ANY correction from the user: update the project's wiki page at `memory/wiki/projects/{project-name}.md` — append to "## Lessons Learned".
+- Write rules that prevent the same mistake from recurring.
+- Review the project's wiki page at session start.
+
+### 4. No Blind Retries
+- **Never retry a command that failed with a non-transient error.** Diagnose the root cause instead.
+- Non-transient: validation errors, 401, 403, permission denied.
+- Transient (ok to retry once): network timeout, 429, 503, connection reset.
+- After 2 failures on the same command: stop, explain the issue, ask the user.
+
+### 5. Keep It Simple
+- Don't add features, refactor code, or make improvements beyond what was asked.
+- For non-trivial changes: pause and ask "is there a more elegant way?"
+- If a fix feels hacky: step back and implement the clean solution.
+
+## Session Routine
+
+**Start of session:**
+- Read the project's wiki page at `memory/wiki/projects/{project-name}.md` — especially "## Lessons Learned".
+- Review any active work notes or prior session context.
+
+**End of session:**
+- Capture any new lessons in the project's wiki page ("## Lessons Learned").
+- Note what was done and what's next.
+- Follow the end-session skill (`memory/workflows/end-session.md` or trigger word "end session").
+
+**Wiki compounding (when significant work was done):**
+- If a reusable pattern was discovered, create or update a page in `memory/wiki/patterns/`.
+- If a domain gotcha was learned, update the relevant `memory/wiki/domains/*.md` page.
+- Update `memory/log.md` with: `- **{timestamp}** | UPDATE | "{what changed}" | project: {name}`
+
+## Available Skills
+
+The following skills are installed via tri-surface (both GitHub Copilot CLI and Claude Code can trigger them):
+
+| Skill | Trigger | Purpose |
+|---|---|---|
+| `ingest` | "ingest X" | Compile a source into a wiki page (7-phase pipeline) |
+| `end-session` | "end session", "wrap up" | Capture lessons, update project page, git check |
+| `query` | "query X", "what do we know about X" | Answer a question with `[[wikilinks]]` |
+| `lint` | "lint", "health check" | Run wiki health checks, report findings |
+| `plan-week` | "plan week", "Monday plan" | Draft the ISO week's plan |
+| `close-week` | "close week", "Friday review" | Aggregate the week's activity, freeze the file |
+| `project-status` | "project status" (from inside a child project) | 30-sec situational briefing |
+| `review-sessions` | "review sessions" | Analyse past sessions for workflow improvements |
+| `new-engagement` | "new engagement <Client> — <topic> (format)" | Scaffold a new client engagement from `project-template/` |
+
+## Project Structure Convention
+
+Every project scaffolded by `new-engagement` (or created manually) has this shape:
+
+```
+project-root/
+├── AGENT.md                                            # MAIN — overview, env, commands, workflow, refs
+├── CLAUDE.md                                           # Thin shim → "Read AGENT.md"
+├── README.md                                           # Human-facing
+├── LICENSE                                             # Open-source license
+├── .gitignore
+├── .github/
+│   ├── copilot-instructions.md                         # GitHub Copilot CLI shim → AGENT.md
+│   └── instructions/
+│       └── end-session.instructions.md                 # Per-project end-session shim
+├── .claude/
+│   ├── CLAUDE.md                                       # Claude Code project config
+│   └── commands/
+│       └── status.md                                   # /status slash-command (30-sec briefing)
+└── (format-specific folders: slides/, demos/, exercises/, docs/...)
+```
+
+Lessons learned and technical reference are centralized in `memory/wiki/projects/{project-name}.md` — not duplicated in the repo.
+```
+
+---
+
+### Step 8: Create `memory/agent-config/platform.md`
+
+Ask the user what platform they're on (OS, language runtimes, cloud provider). If the user doesn't specify, create sensible defaults:
+
+```markdown
+---
+title: Platform & Preferences
+category: agent-config
+tags: [platform, environment]
+date_created: {{today}}
+date_updated: {{today}}
+---
+
+# Platform & Preferences
+
+## Environment
+
+- OS: (ask user, or detect from current environment)
+- Primary language(s): (ask user)
+- Cloud provider: (ask user, or "none" if local-only)
+
+## Platform Gotchas
+
+<!-- Add platform-specific gotchas as you discover them -->
+<!-- Example: "Always use encoding='utf-8' for subprocess on Windows" -->
+
+## Cross-Project Knowledge
+
+Shared domain knowledge files are stored in `agent-config/knowledge/` — consult when working in the relevant domain.
+```
+
+---
 
 ### Step 9: Create template files
 
@@ -1875,9 +1908,15 @@ Keep the briefing scannable. No fluff. The reader should know exactly where thin
 
 ### Step 12: Verification
 
-Run a verification checklist:
+## Definition of Done
+
+The setup is complete only when every required item below passes. Inspect the files; do not mark boxes based on intended work.
 
 ```
+[ ] SKILL GATE: 9 Copilot instruction files exist under .github/instructions/
+[ ] SKILL GATE: 9 Claude SKILL.md files exist under .claude/skills/
+[ ] SKILL GATE: 9 agent-neutral workflow files exist under memory/workflows/
+[ ] SKILL GATE: all 9 skill bodies match across the 3 copies after frontmatter is removed
 [ ] memory/schema.md exists with YAML frontmatter
 [ ] memory/index.md exists with category sections
 [ ] memory/log.md exists with INIT entry
@@ -1889,18 +1928,22 @@ Run a verification checklist:
 [ ] memory/wiki/{projects,domains,patterns,lessons,skills,agents,tools,_queries}/ directories exist
 [ ] memory/raw/ directory exists
 [ ] memory/ops/weekly/ directory exists and memory/ops/activity.jsonl exists (empty)
-[ ] For each of the 9 skills, all 3 surfaces exist:
-    [ ] .github/instructions/{slug}.instructions.md   (with applyTo: "**" frontmatter)
-    [ ] .claude/skills/{slug}/SKILL.md                (with name + description frontmatter)
-    [ ] memory/workflows/{slug}.md                    (with applyTo: "**" frontmatter)
-    [ ] Body is byte-identical across all 3 files
 [ ] project-template/ scaffold exists with 9 canonical files (if Step 11 was completed)
 [ ] AGENT.md exists at project root and references memory/agent-config/workflow.md + lists all 9 skills
 [ ] CLAUDE.md exists at project root and points to AGENT.md
 [ ] .github/copilot-instructions.md exists at project root and points to AGENT.md
 ```
 
-Report the checklist results to the user.
+### Required completion report
+
+Report one of these outcomes:
+
+- `SETUP COMPLETE — 9/9 skills installed for Copilot CLI and Claude Code; 27/27 skill files present; wiki ready.`
+- `SETUP INCOMPLETE — <failed checks and missing paths>.` Then continue repairing the failed checks; do not stop at this report unless blocked by permissions or missing tool access.
+
+Do not call a directory under `memory/wiki/skills/` an installed skill surface. It is wiki content only.
+
+Newly created skills may require a **new agent session** before GitHub Copilot CLI or Claude Code discovers them. File verification happens now; discovery is smoke-tested after restarting the agent in this folder.
 
 ---
 

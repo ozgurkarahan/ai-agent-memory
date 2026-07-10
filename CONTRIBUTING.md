@@ -4,23 +4,23 @@ Thanks for your interest in contributing to **ai-agent-memory**! This repo is a 
 
 ## Adding or changing a skill
 
-Skills live in **three parallel locations** that must stay in sync — one per supported agent surface, plus a plain-Markdown reference:
+Skills live in **three parallel locations** that must stay in sync — two native discovery surfaces plus one agent-neutral Markdown reference:
 
-| Path | Surface | Frontmatter |
+| Path | Role | Frontmatter |
 |---|---|---|
 | `.github/instructions/{slug}.instructions.md` | GitHub Copilot CLI auto-discovery | `applyTo: "**"` |
 | `.claude/skills/{slug}/SKILL.md` | Claude Code project-scoped skill auto-discovery | `name: {slug}` + `description: ...` |
 | `memory/workflows/{slug}.md` | Agent-agnostic plain-Markdown reference (canonical source for documentation; also loaded via the maintainer's `AGENT.md` pointer pattern) | `applyTo: "**"` (current convention) |
 
-When you change one, update the other two in the same commit. The bodies should be identical across the three surfaces — only the per-surface frontmatter block differs.
+When you change one, update the other two in the same commit. The bodies should be identical across the three copies — only the frontmatter block differs.
 
-**Why three surfaces?** Each agent has its own skill-discovery mechanism:
+**Why three copies?** The native agents have different discovery mechanisms, while other agents need a portable reference:
 
 - GitHub Copilot CLI loads any file matching `.github/instructions/*.instructions.md` whose `applyTo` glob matches the current workspace
 - Claude Code loads any `SKILL.md` under `.claude/skills/{slug}/` and routes invocations based on the `description:` field, so write the description carefully — it's what the agent's skill router sees
 - The plain-Markdown copy under `memory/workflows/` is the human-readable canonical source for documentation, and is what skills like `ingest` reference internally when discussing other skills
 
-A skill that ships in only one of the three locations is invisible to two of the three agent ecosystems this repo targets.
+A skill missing from either native location is unavailable to that agent. A skill missing from `memory/workflows/` is unavailable to agents that rely on the portable `AGENT.md` pointer pattern.
 
 ### Skill style
 
