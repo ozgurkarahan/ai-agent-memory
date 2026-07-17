@@ -7,6 +7,15 @@ Versioning follows [Calendar Versioning](https://calver.org/) (`YYYY.0M.MICRO`) 
 
 ## [Unreleased]
 
+## [2026.07.0] — 2026-07-17
+
+Makes the self-contained bootstrap reliable for no-code, agent-only installation and clarifies how every coding agent connects to the shared memory loop.
+
+### Added
+
+- **Karpathy memory-loop architecture diagram** in `README.md` — shows how learning moments flow through `ingest` / `end session` into the wiki and return through `index.md` to the next session across Copilot, Claude Code, Codex, and Cursor.
+- **Shared memory-wiki pointers** in `AGENTS.md` and `.github/copilot-instructions.md` — agents are instructed to search the central wiki and read matching pages before answering from memory.
+
 ### Fixed
 
 - **Bootstrap reliability for agent-only installs** — executable skills are now the first mandatory bootstrap deliverable instead of Step 8 after the wiki. The prompt is resume-safe, blocks wiki creation until all 27 skill copies pass a mandatory gate, distinguishes executable skill locations from `memory/wiki/skills/` knowledge pages, and uses a fail-closed Definition of Done that cannot report a wiki-only installation as complete. Also restores byte-identical `new-engagement` bodies across all three copies.
@@ -92,7 +101,8 @@ First versioned release. Brings the new and updated agent skills from the mainta
 - `review-sessions` defines an agent-agnostic contract but no reference parser ships in this release — implementers should match the schema documented in the skill (Copilot CLI event-stream parser + Claude Code turn parser).
 - Reference: [PR #1](https://github.com/ozgurkarahan/ai-agent-memory/pull/1).
 
-[Unreleased]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.05.2...HEAD
+[Unreleased]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.07.0...HEAD
+[2026.07.0]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.05.2...v2026.07.0
 [2026.05.2]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.05.1...v2026.05.2
 [2026.05.1]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.05.0...v2026.05.1
 [2026.05.0]: https://github.com/ozgurkarahan/ai-agent-memory/releases/tag/v2026.05.0
