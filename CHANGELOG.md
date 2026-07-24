@@ -7,6 +7,21 @@ Versioning follows [Calendar Versioning](https://calver.org/) (`YYYY.0M.MICRO`) 
 
 ## [Unreleased]
 
+## [2026.07.1] — 2026-07-24
+
+Makes the public bootstrap operationally self-contained: every installed workflow now runs with files created by the bootstrap itself, without private helpers or maintainer-specific paths.
+
+### Fixed
+
+- **Zero-helper-script runtime contract** — `ingest`, `lint`, and `review-sessions` now operate through agent-native file and JSONL procedures instead of calling Python helpers that the bootstrap never installed. All nine workflows resolve the memory root portably, `new-engagement` resolves its template and destination instead of assuming the maintainer's home-directory layout, and the project template no longer embeds private paths. The bootstrap now installs that template as a required offline dependency. Ingest activity counts derive from the same deduplicated file list shown in its report.
+- **Bootstrap dependency regression gate** — generation now fails when the three skill surfaces drift or when consumer-facing workflows/templates reference unshipped `scripts/*.py` helpers or maintainer-specific paths. The generated Definition of Done includes explicit dependency and portability gates.
+- **Fresh-catalog link integrity** — links to agent config and installed workflow files use direct Markdown paths instead of unresolved wiki-page links.
+
+### Validation
+
+- Two independent clean-room agents installed all 27 skill files from `bootstrap.md` and passed exact body-parity, dependency, portability, and catalog-link gates.
+- A fresh agent completed `ingest` plus `lint` using only installed files; an external hash baseline confirmed the activity event's file count matched every changed path.
+
 ## [2026.07.0] — 2026-07-17
 
 Makes the self-contained bootstrap reliable for no-code, agent-only installation and clarifies how every coding agent connects to the shared memory loop.
@@ -101,7 +116,8 @@ First versioned release. Brings the new and updated agent skills from the mainta
 - `review-sessions` defines an agent-agnostic contract but no reference parser ships in this release — implementers should match the schema documented in the skill (Copilot CLI event-stream parser + Claude Code turn parser).
 - Reference: [PR #1](https://github.com/ozgurkarahan/ai-agent-memory/pull/1).
 
-[Unreleased]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.07.0...HEAD
+[Unreleased]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.07.1...HEAD
+[2026.07.1]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.07.0...v2026.07.1
 [2026.07.0]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.05.2...v2026.07.0
 [2026.05.2]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.05.1...v2026.05.2
 [2026.05.1]: https://github.com/ozgurkarahan/ai-agent-memory/compare/v2026.05.0...v2026.05.1
