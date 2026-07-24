@@ -101,7 +101,7 @@ project-root/
 │   └── ops/                                    # Operational state for plan-week/close-week
 │       ├── weekly/                             # ISO week files (e.g., 2026-W18.md)
 │       └── activity.jsonl                      # Append-only event log
-└── project-template/                           # Optional: scaffold for new engagements (Step 11)
+└── project-template/                           # Required offline scaffold for new engagements (Step 11)
 ```
 
 Create all directories (including empty ones like `raw/`, `wiki/projects/`, `memory/ops/weekly/`).
@@ -145,20 +145,29 @@ Two triggers:
 - **"ingest"** — single-source ingest. Follow Phase 1 → Phase 7 as written.
 - **"mass ingest"** / **"bulk ingest"** / **"ingest all ... from ..."** — multi-source batch. MUST insert **Phase 0 (Inventory)** and **Phase 2b.5 (Consolidation Planning)** before compiling anything. See [[ingest]] consolidation section for the full pattern and rationale.
 
+## Resolve the memory root
+
+1. If `memory/schema.md` exists in the current workspace, set `WIKI_ROOT` to `memory/`.
+2. Else if `schema.md` exists, set `WIKI_ROOT` to the current directory.
+3. Else follow the memory-wiki path declared in the current project's `AGENT.md`.
+4. If no folder containing both `schema.md` and `index.md` resolves, report the missing path and stop.
+
+All relative paths below are under `WIKI_ROOT`.
+
 ## Phase 0: Inventory (mass ingest only)
 
-Before any M365-query-tool / raw pulls:
+Before pulling content from files or any connected source tool:
 
 1. **List every source** you intend to ingest (OneNote sections, files, URLs, query topics).
 2. **Save the inventory** to the session folder or as a temp list. Do NOT start pulling yet.
-3. **If the source system can't be enumerated** (e.g., M365-query-tool on OneNote hierarchy), explicitly state the limitation and the coverage estimate (e.g., "~70-80% via targeted topic queries") before proceeding.
+3. **If the source system can't be enumerated**, explicitly state the limitation and the coverage estimate before proceeding.
 4. **Ask the user to confirm scope** if the inventory is >10 sources — consolidation decisions are cheaper to agree on upfront than to refactor later.
 
 ## Phase 1: Gather Context
 
-1. **Read `~/projects/memory/schema.md`** — understand wiki structure, categories, naming rules
-2. **Read `~/projects/memory/index.md`** — get the full list of existing articles with paths (needed for backlink resolution)
-3. **Read `~/projects/memory/glossary.md`** — check existing terms
+1. **Read `schema.md`** — understand wiki structure, categories, naming rules
+2. **Read `index.md`** — get the full list of existing articles with paths (needed for backlink resolution)
+3. **Read `glossary.md`** — check existing terms
 4. **Read the source content** — the file, topic, or conversation findings to ingest
 
 ## Phase 2: LLM Compilation (this is YOU — use your reasoning)
@@ -166,16 +175,15 @@ Before any M365-query-tool / raw pulls:
 Compile the source into structured wiki knowledge. Ask yourself:
 
 ### 2a. What type of knowledge is this?
-- **Project knowledge** → `wiki/projects/{client-folder}/{slug}.md` for top-level clients (`acme`, `fabrikam`, `contoso`, `northwind`); else `wiki/projects/{slug}.md` (create or update). See [[schema]] "Client-folder rule".
+- **Project knowledge** → `wiki/projects/{slug}.md` (create or update)
 - **Domain/technology knowledge** → `wiki/domains/{slug}.md` (create or update)
 - **Reusable pattern** → `wiki/patterns/{slug}.md` (create or update)
 - **Debugging lesson / gotcha** → `wiki/lessons/{slug}.md` (create or update)
 - **Skill / command / triggerable workflow** → `wiki/skills/{slug}.md` (create or update)
 - **Agent / subagent / role-based executor** → `wiki/agents/{slug}.md` (create or update)
 - **Tool knowledge** → `wiki/tools/{slug}.md` (create or update; only for products, CLIs, SDKs, APIs, services, utilities)
-- **Microsoft colleague / MS-internal entity** → `wiki/microsoft/colleagues/{slug}.md` (MS employees only — customer/partner contacts stay tabular on the relevant `wiki/clients/{slug}.md` hub)
-- **Personal career artefact (BR log, goals)** → `wiki/career/{slug}.md`
 - **Platform/env knowledge** → `agent-config/platform.md` or `agent-config/knowledge/{domain}.md` (update)
+- If a source does not fit the installed taxonomy, ask before extending `schema.md`; do not invent a private or organization-specific category.
 
 ### 2b. Create or update?
 - Search `index.md` for existing pages about this topic
@@ -188,9 +196,9 @@ For **new pages**, generate YAML frontmatter + Markdown body following `schema.m
 ```markdown
 ---
 title: "Descriptive Title"
-category: clients|projects|domains|patterns|skills|agents|lessons|tools|meetings|career|microsoft|personal|queries|ops
+category: projects|domains|patterns|skills|agents|lessons|tools|queries
 tags: [tag1, tag2, tag3]
-source_docs: ["original-source.ext"]
+source_docs: ["raw/data/source-slug-YYYY-MM-DD.md"]
 date_created: YYYY-MM-DD
 date_updated: YYYY-MM-DD
 ---
@@ -220,17 +228,16 @@ Before writing ANY wiki page, produce a consolidation matrix mapping every inven
 
 | Source (raw snapshot) | Topic / entity | Target page | Action | Rationale |
 |---|---|---|---|---|
-| m365-query-onenote-acme-...md | Acme contracts + GH→GitLab | wiki/clients/acme.md | UPDATE (append OneNote section) | hub exists, same entity |
-| m365-query-onenote-globex-...md | Globex BR | wiki/projects/northwind/segment-customers.md | CREATE (new hub) | no page, 8+ similar non-direct customers share it |
-| m365-query-onenote-br-...md | personal BR log | wiki/career/br-personal.md | CREATE | rolling personal log, distinct from team hub |
+| architecture-notes.md | Product Alpha architecture | wiki/projects/product-alpha.md | UPDATE | project page exists |
+| retry-postmortem.md | API retry failures | wiki/lessons/api-retry-failures.md | CREATE | reusable debugging lesson |
+| queue-benchmarks.md | Async queue design | wiki/patterns/async-queue-design.md | CREATE | cross-project pattern |
 
 **Consolidation rules:**
 
 - **Same entity across N sources → ONE page section.** Never create `acme-foo.md` + `acme-bar.md` when `acme.md` exists.
 - **Cross-cutting theme in 3+ sources → promote to its own page** (domain / pattern / lesson). Below 3 sources → inline section on an existing hub.
 - **Ephemeral / one-off mention → append to nearest hub**, don't create a page.
-- **Sibling cohort (N similar entities) → ONE hub page** with a section per sibling. Rule of thumb: if you'd write the same 3 subsections for each, make it a hub (e.g., `northwind-segment-customers.md` covers 9 non-direct customers).
-- **Personal rolling log → dedicated page** (e.g., `br-personal.md`), NOT a section on the team page.
+- **Sibling cohort (N similar entities) → ONE hub page** with a section per sibling. If the same subsections would be repeated for each item, consolidate them.
 - **Target "8-15 files touched"** applies to the whole mass ingest, not per source. A 20-source mass ingest touching 15 files is correctly consolidated; touching 40 is over-fragmented.
 
 After the matrix is approved (or self-reviewed for small batches), execute Phase 2c on each target in the matrix. Multiple sources writing to the same target → merge their content in one edit pass.
@@ -257,21 +264,15 @@ After compiling the article, update these files:
 
 **Every ingest MUST produce an immutable raw snapshot**, regardless of source type:
 
-- **File source** → copy to `raw/{articles|books|pdfs|data}/` using `python scripts/ingest.py raw <file>`
-- **Conversation / M365-query-tool / web search** → write the verbatim response to `raw/data/{source}-{slug}-YYYY-MM-DD.md`
+- **File source** → copy it byte-for-byte to `raw/{articles|books|pdfs|data}/` with the agent's filesystem copy tool (or the platform's native copy command). Do not require a helper script.
+- **Conversation / connected source tool / web search** → write the verbatim response to `raw/data/{source}-{slug}-YYYY-MM-DD.md`
 - **User-provided text** → save as-is to `raw/data/{slug}-YYYY-MM-DD.md`
 
 The `source_docs:` frontmatter field on every new wiki page MUST point to a real file under `raw/`, not a free-text description. Without this, the ingest is not auditable and violates the Karpathy 3-layer architecture (RAW / WIKI / SCHEMA).
 
 ## Phase 5: Lint (ALWAYS — required gate)
 
-**Run the lint after every ingest.** This is non-negotiable — it catches orphan pages, broken wikilinks, and missing backlinks that are trivial to fix immediately but expensive to untangle later.
-
-```powershell
-cd ~/projects/memory
-$env:PYTHONIOENCODING='utf-8'   # Windows: prevent cp1252 crash on box-drawing chars
-python scripts/lint.py --semantic --log
-```
+**Invoke the installed `lint` skill after every ingest.** It inspects the wiki directly with agent-native file/search tools; no helper script is required. This gate is non-negotiable because it catches orphan pages, broken wikilinks, and missing backlinks.
 
 Report lint delta attributable to the ingest:
 - **New orphan pages introduced?** → add at least one incoming `[[wikilink]]` from a related page
@@ -286,11 +287,11 @@ Before writing the final report in Phase 7, run this 7-item self-audit. If ANY i
 
 ```
 [ ] 1. Raw source exists under raw/ AND is referenced in source_docs: frontmatter?
-      → grep for the new page's source_docs value in raw/ tree
+      → search the `raw/` tree for the new page's `source_docs` value
 [ ] 2. New page has ≥1 incoming [[wikilink]] from an existing page?
-      → grep -r "[[<new-slug>]]" wiki/  → must return ≥1 hit outside the new page itself
+      → search `wiki/` for `[[<new-slug>]]` → must return ≥1 hit outside the new page itself
 [ ] 3. index.md count matches actual file count in the category?
-      → compare "## Projects (N articles)" vs `find wiki/projects -name '*.md' -not -name '_index.md' | wc -l` (recursive — client subfolders included)
+      → compare the count in `index.md` with an agent-native recursive inventory of category pages (exclude `_index.md`)
 [ ] 4. Category _index.md lists the new page?
 [ ] 5. Glossary has any new terms (acronyms, product names) introduced by the source?
 [ ] 6. log.md has a new INGEST entry with ISO timestamp, title, source, category, pages?
@@ -303,9 +304,56 @@ Before writing the final report in Phase 7, run this 7-item self-audit. If ANY i
 
 **If you claim an ingest is complete without running this audit, you have failed the Karpathy pattern.** The pattern's value is compounding memory — that only works if every ingest leaves the graph in a consistent state, enforced mechanically, not by hope.
 
-## Phase 7: Report
+## Phase 7: Emit Activity Event (REQUIRED)
 
-Report a table:
+After lint and self-audit, but before the final report, append **one** line to `ops/activity.jsonl`. This makes the weekly activity table aggregatable on Friday.
+
+Rules:
+
+1. **Identify the `primary_topic`** — the single canonical wiki page this ingest is about. It must be a slug listed in `index.md`.
+   - For a new domain page → its own slug (e.g., `event-streaming`).
+   - For an updated project page → the project slug (e.g., `product-alpha`).
+   - For a debugging lesson → the lesson slug (e.g., `api-retry-failures`).
+   - **Do NOT** emit an event per modified file (`index.md`, `glossary.md`, `_index.md`, backlinks…). Those are pipeline exhaust, not work signal.
+
+2. **Identify `secondary_topics`** (0-2 max) — only if the ingest meaningfully co-touches another canonical page. Most ingests have none.
+
+3. **Resolve the active week** — ISO week of `current_datetime` in `Europe/Paris`. Format `2026-W{NN}`.
+
+4. **Verify the active week file exists** — `ops/weekly/{week}.md`. If missing, create this minimal skeleton (replace placeholders):
+
+   ```markdown
+   ---
+   title: Week {week}
+   category: ops
+   week: {week}
+   status: open
+   touches: []
+   date_created: YYYY-MM-DD
+   date_updated: YYYY-MM-DD
+   ---
+
+   # Week {week}
+
+   <!-- BEGIN GENERATED ACTIVITY -->
+   <!-- END GENERATED ACTIVITY -->
+   ```
+
+5. **Add the slug to the week file's `touches:` frontmatter** (deduped). This is the only edit `ingest` makes to the weekly markdown file — it never edits the activity table directly.
+
+6. **Build one deduplicated changed-file list** containing every file created, updated, or appended during all phases, including the raw snapshot, wiki pages, backlinks, indexes, glossary, `log.md`, the weekly file, and `ops/activity.jsonl`. Do not include files that were only read.
+
+7. **Append to `ops/activity.jsonl`** — one JSON object per line:
+
+```json
+{"ts":"2026-07-24T11:48:00+02:00","week":"2026-W30","source":"ingest","topic":"api-retry-failures","secondary":["event-streaming"],"resolved":true,"note":"Retry postmortem","files":9}
+```
+
+Required fields: `ts` (ISO 8601 with TZ offset), `week`, `source: "ingest"`, `topic`, `resolved` (based on the slug existing in `index.md`), `note` (≤80 chars), and `files` (the exact number of distinct paths in the changed-file list from Step 6). Optional: `secondary` (0-2 slugs).
+
+## Phase 8: Report
+
+Report the same deduplicated changed-file list used for the event count:
 
 | Action | File | Change |
 |--------|------|--------|
@@ -315,43 +363,14 @@ Report a table:
 | UPDATE | glossary.md | Added term: ... |
 | APPEND | log.md | INGEST entry |
 
-**Target: 8-15 files touched per ingest.**
+The number of table rows, distinct changed paths, and the event's `files` value must agree. Touch only files needed for source traceability and graph consistency; do not chase an arbitrary file-count target.
 
-Include the self-audit result AND the lint summary in the report:
+Include the self-audit result and lint summary:
 
 | Gate | Result |
 |------|--------|
-| Self-audit (7 items) | 7/7 pass |
-| Lint (semantic, post-ingest) | 0 new issues introduced (41 pre-existing unchanged) |
-
-## Phase 8: Emit Activity Event (REQUIRED)
-
-After the report, append **one** line to `~/projects/memory/ops/activity.jsonl` to record this ingest in the operational log. This is what makes the weekly file's activity table aggregate correctly on Friday close-week.
-
-Rules:
-
-1. **Identify the `primary_topic`** — the single canonical wiki page this ingest is about. It must be a slug listed in `index.md`.
-   - For a new domain page → its own slug (e.g., `azure-ai-search-sharepoint`).
-   - For an update to a project page → the project page slug (e.g., `contoso-archetypes-foundry`).
-   - For a meeting recap update → the meeting page slug (e.g., `br-personal`), NOT every related project page.
-   - **Do NOT** emit an event per modified file (`index.md`, `glossary.md`, `_index.md`, backlinks…). Those are pipeline exhaust, not work signal.
-
-2. **Identify `secondary_topics`** (0-2 max) — only if the ingest meaningfully co-touches another canonical page. Most ingests have none.
-
-3. **Resolve the active week** — ISO week of `current_datetime` in `Europe/Paris`. Format `2026-W{NN}`.
-
-4. **Append to `ops/activity.jsonl`** — one JSON object per line:
-
-```json
-{"ts":"2026-04-25T21:51:00+02:00","week":"2026-W18","source":"ingest","topic":"contoso-archetypes-foundry","secondary":["azure-ai-search-sharepoint"],"resolved":true,"note":"24-Apr meeting recap","files":6}
-```
-
-Required fields: `ts` (ISO 8601 with TZ offset), `week`, `source: "ingest"`, `topic`, `resolved` (true/false based on slug existing in `index.md`), `note` (≤80 chars), `files` (count of files CREATEd/UPDATEd in this ingest).
-Optional: `secondary` (array of slugs).
-
-5. **Verify the active week file exists** — `ops/weekly/{week}.md`. If missing, create it from the template (frontmatter only — `plan-week` will fill the Monday plan later, or the user will).
-
-6. **Add the slug to the week file's `touches:` frontmatter** (deduped). This is the only edit `ingest` makes to the weekly markdown file — it never edits the activity table directly (that's `close-week`'s job, between the sentinels).
+| Self-audit (7 core items) | 7/7 pass |
+| Lint (post-ingest) | 0 new issues introduced (N pre-existing unchanged) |
 
 ## Anti-Patterns (don't do these)
 
@@ -360,15 +379,15 @@ Optional: `secondary` (array of slugs).
 - ❌ Don't use LLM-generated concept names as slugs — derive from content deterministically
 - ❌ Don't skip updating index.md and log.md
 - ❌ Don't append raw text to knowledge files — compile it into structured sections
-- ❌ Don't point `source_docs:` at a free-text string ("M365-query-tool query") — always a real file under `raw/`
+- ❌ Don't point `source_docs:` at a free-text source description — always use a real file under `raw/`
 - ❌ Don't skip the lint step — it's a required gate, not optional
 - ❌ Don't skip the **self-audit gate** (Phase 6) and jump to reporting — the audit IS the proof the Karpathy pattern was followed
 - ❌ Don't mark an ingest "done" until `source_docs:` in the new page points to a real file under `raw/` AND the new page has at least one incoming `[[wikilink]]` from an existing page
 - ❌ (mass ingest) Don't start pulling sources before the Phase 0 inventory is written down — leads to forgotten sources and inconsistent coverage
 - ❌ (mass ingest) Don't create one wiki page per source — consolidate same-entity / sibling-cohort sources via the Phase 2b.5 matrix
 - ❌ (mass ingest) Don't write N log.md entries for one logical batch — one consolidated entry instead
-- ❌ (Phase 8) Don't emit an activity event per modified file — only ONE per ingest with `primary_topic`. Pipeline exhaust ≠ work signal.
-- ❌ (Phase 8) Don't write to `ops/weekly/{week}.md`'s activity table directly — only `close-week` regenerates it between the sentinels.
+- ❌ (Phase 7) Don't emit an activity event per modified file — only ONE per ingest with `primary_topic`. Pipeline exhaust ≠ work signal.
+- ❌ (Phase 7) Don't write to `ops/weekly/{week}.md`'s activity table directly — only `close-week` regenerates it between the sentinels.
 ~~~
 
 ---
@@ -389,12 +408,21 @@ description: "Wrap up the current coding session: update the project wiki page w
 
 When the user says "end session", "wrap up", or "done for today":
 
-1. **Project wiki page** — Check if `~/projects/memory/wiki/projects/{project}.md` needs updates from today's work (lessons, decisions, technical details, status). Propose changes. *(Note: legacy `.ai/lessons-learned.md` / `.ai/project-reference.md` were retired 2026-04-22 — all project knowledge now lives directly on the wiki page.)*
+## Resolve the memory root
+
+1. If `memory/schema.md` exists in the current workspace, use `memory/`.
+2. Else if `schema.md` exists, use the current directory.
+3. Else follow the memory-wiki path declared in the current project's `AGENT.md`.
+4. If no folder containing both `schema.md` and `index.md` resolves, report that the wiki update is blocked; still perform the Git check.
+
+All wiki paths below are relative to that memory root.
+
+1. **Project wiki page** — Check if `wiki/projects/{project}.md` needs updates from today's work (lessons, decisions, technical details, status). Propose changes. *(Note: legacy `.ai/lessons-learned.md` / `.ai/project-reference.md` were retired — project knowledge lives directly on the wiki page.)*
 2. **Wiki compounding** — If significant lessons or patterns were discovered:
-   - Update relevant domain pages at `~/projects/memory/wiki/domains/*.md`
-   - Add new glossary terms to `~/projects/memory/glossary.md`
+   - Update relevant domain pages under `wiki/domains/`
+   - Add new glossary terms to `glossary.md`
    - Create or update pattern/lesson pages if applicable
-   - Append to `~/projects/memory/log.md`
+   - Append to `log.md`
 3. **Git check** — Run `git status` and warn about uncommitted changes.
 4. **Summary** — Present a table:
 
@@ -425,6 +453,15 @@ description: "Answer a question by searching the wiki: read index.md, find relev
 
 When the user asks a question about the knowledge base or says "query":
 
+## Resolve the memory root
+
+1. If `memory/schema.md` exists in the current workspace, use `memory/`.
+2. Else if `schema.md` exists, use the current directory.
+3. Else follow the memory-wiki path declared in `AGENT.md`.
+4. If no folder containing both `schema.md` and `index.md` resolves, report the missing path and stop.
+
+All paths below are relative to that memory root.
+
 1. **Read `index.md`** first — scan the content catalog for relevant pages
 2. **Read relevant pages in full** — don't skip or summarize prematurely
 3. **Synthesize an answer** with `[[wikilink]]` citations to source pages
@@ -451,19 +488,69 @@ description: "Run wiki health checks (structural + semantic) and report findings
 
 **Body** (save to all 3 paths — `.github/instructions/lint.instructions.md`, `.claude/skills/lint/SKILL.md`, `memory/workflows/lint.md`):
 
+~~~markdown
+# Lint Wiki — Agent-Native Health Check
+
+When the user says "lint", "health check", or "check wiki", inspect the wiki directly with the agent's file listing, search, and read tools. This skill has no helper-script dependency.
+
+## Resolve the memory root
+
+Before reading or writing:
+
+1. If `memory/schema.md` exists in the current workspace, set `WIKI_ROOT` to `memory/`.
+2. Else if `schema.md` exists in the current workspace, set `WIKI_ROOT` to the current directory.
+3. Else follow the memory-wiki path declared in the current project's `AGENT.md`.
+4. If none resolves to a folder containing both `schema.md` and `index.md`, report the missing path and stop. Do not guess.
+
+All paths below are relative to `WIKI_ROOT`.
+
+## Procedure
+
+1. Read `schema.md` and `index.md`.
+2. Inventory all Markdown pages recursively under `wiki/`. Treat `_index.md` files as indexes, not content pages.
+3. Build a slug map from content-page filenames and extract every `[[wikilink]]` target, ignoring aliases (`|...`) and headings (`#...`).
+4. Run the checks below using the agent's native search/read capabilities:
+
+### Critical
+
+- **Missing or malformed frontmatter** — page does not start with a complete `---` block or lacks `title`, `category`, `date_created`, or `date_updated`.
+- **Broken wikilink** — target slug does not resolve to a content page.
+- **Orphan page** — content page has no incoming wikilink from another page or index.
+- **Invalid source reference** — a `source_docs:` entry is non-empty but does not resolve to a file under `raw/`.
+
+### Important
+
+- **Missing catalog entry** — content page is absent from `index.md`.
+- **Missing category index entry** — when `wiki/{category}/_index.md` exists, it does not link the page.
+- **Thin page** — fewer than 50 prose words outside frontmatter and headings.
+- **Cross-reference gap** — two clearly related existing pages mention the same canonical entity but do not link to each other.
+
+### Informational
+
+- Duplicate or ambiguous slugs across category folders.
+- Stale pages whose `date_updated` is more than six months old.
+- Unlinked glossary terms that appear repeatedly in content.
+
+5. Present findings by severity with counts, affected paths, and a specific fix for every critical or important issue.
+6. Do not modify files unless the user asks for fixes. If fixes are requested, apply them and rerun this full procedure.
+7. For an ingest gate, compare before/after findings and require **zero new issues introduced by that ingest**. Pre-existing unrelated findings may remain documented.
+
+## Output
+
 ```markdown
-# Lint Wiki
+## Wiki Health
 
-When the user says "lint", "health check", or "check wiki":
+| Severity | Count |
+|---|---:|
+| Critical | N |
+| Important | N |
+| Informational | N |
 
-1. Run: `python scripts/lint.py --semantic --log`
-2. Present findings by severity:
-   - **Critical** — orphan pages, missing frontmatter, suggested new pages (3+ broken refs)
-   - **Important** — cross-reference gaps, thin pages
-   - **Informational** — unlinked entities, broken links with <3 refs
-3. For each critical/important finding, suggest a specific fix
-4. If the user wants fixes applied, follow the ingest checklist for all updates
+### Findings
+| Severity | Path | Finding | Fix |
+|---|---|---|---|
 ```
+~~~
 
 ---
 
@@ -483,10 +570,14 @@ description: "Plan the upcoming ISO week: resolve active week (TZ Europe/Paris),
 
 When the user says "plan week", "Monday plan", or "/plan-week":
 
-1. Resolve active ISO week (TZ Europe/Paris) → `ops/weekly/2026-W{NN}.md`. Create from template if missing.
+## Resolve the memory root
+
+Resolve `WIKI_ROOT` using `memory/schema.md`, then `schema.md`, then the pointer in `AGENT.md`. Stop with the missing path if none contains both `schema.md` and `index.md`. All paths below are relative to `WIKI_ROOT`.
+
+1. Resolve active ISO week (TZ Europe/Paris) → `ops/weekly/2026-W{NN}.md`. If missing, create the minimal weekly skeleton defined by the `ingest` skill.
 2. Lift carry-over from prior week's `### Seed for W{NN}` block.
-3. Grep open `- [ ]` todos in `wiki/projects/*.md` + `wiki/meetings/*.md` (recent activity, last 14 days).
-4. Optional M365-query-tool pull: calendar (next 7 days), unread/flagged mail, open Teams threads.
+3. Find open `- [ ]` todos recursively under `wiki/`, prioritizing pages updated in the last 14 days.
+4. Optionally use any connected work-data source available to the agent for the next 7 days of calendar, flagged mail, or open collaboration threads. Skip this step when no such tool is available.
 5. Draft `## 🎯 Monday plan` grouped by `### [[topic]]`. Show diff. User confirms.
 6. Update `touches: []` frontmatter with topic slugs touched. Bump `date_updated`.
 
@@ -514,6 +605,10 @@ description: "Close out the working ISO week: aggregate ops/activity.jsonl event
 
 When the user says "close week", "Friday review", or "/close-week":
 
+## Resolve the memory root
+
+Resolve `WIKI_ROOT` using `memory/schema.md`, then `schema.md`, then the pointer in `AGENT.md`. Stop with the missing path if none contains both `schema.md` and `index.md`. All paths below are relative to `WIKI_ROOT`.
+
 1. Resolve active ISO week (TZ Europe/Paris) → `ops/weekly/2026-W{NN}.md`.
 2. **Aggregate** `ops/activity.jsonl` events for that week — group by `topic`, count `touches`, list `days`, find `last`. Sort by touches desc.
 3. **Regenerate the activity block** between the sentinels (wholesale replace):
@@ -523,7 +618,7 @@ When the user says "close week", "Friday review", or "/close-week":
    <!-- END GENERATED ACTIVITY -->
    ```
    Wikilink rule: `[[topic]]` only if `resolved: true`; else plain text + `*(unresolved)*`.
-4. **Optional M365-query-tool pull** for "what shipped" — sent mail / decisions in Teams / meetings attended / files modified.
+4. **Optional connected-source pull** for "what shipped" — sent mail, collaboration decisions, meetings, or modified files. Skip when no work-data tool is available.
 5. **Draft Friday review** sections: Wins · Misses · Lessons → graduate (propose ingest targets, don't auto-run) · Seed for W+1 (top-3 carry-over per topic).
 6. **Freeze**: `status: closed`, bump `date_updated`, append `log.md` entry: `... CLOSE-WEEK | 2026-W{NN} | events: N | topics: [...] | wins: N | lessons-promoted: N`.
 7. **(Optional) Seed W+1** — create `ops/weekly/{next}.md` skeleton.
@@ -553,13 +648,19 @@ description: "Produce a 30-second situational-awareness briefing for any child p
 
 When the user says **"project status"**, **"status briefing"**, or invokes `/project-status` from inside any project directory (NOT memory itself), produce a complete situational-awareness briefing so the user can get up to speed on that project in 30 seconds.
 
-> This skill is for ANY child project (e.g., `~/projects/Acme/10-projects/agent-framework-engagement`). When invoked from `~/projects/memory/` it should refuse and direct the user to the wiki instead (the wiki IS memory's status).
+> This skill is for any child project. When invoked from the memory system itself, refuse and direct the user to the wiki because the wiki is its status.
 >
 > **Coexists with the per-project `/status` command** that ships in every scaffolded project under `.claude/commands/status.md`. The per-project version is Claude-Code-specific. THIS memory skill is the agent-agnostic version (works under GitHub Copilot CLI, Claude Code, or any tool that loads `.github/instructions/`). When both are available, prefer the per-project one if you are inside Claude Code (richer integration), otherwise use this skill.
 
 ## Instructions
 
 Gather information from ALL the sources below, then produce a single structured briefing. Use parallel tool calls to speed up the research.
+
+### Resolve the memory root
+
+1. If the current project contains `schema.md` or `memory/schema.md`, it is the memory system or its installer; refuse as described above.
+2. Otherwise follow the memory-wiki path declared in the child project's `AGENT.md`.
+3. If no memory root resolves, continue the codebase briefing but mark the wiki page as unavailable instead of guessing a personal path.
 
 ### 1. Codebase analysis
 
@@ -572,7 +673,7 @@ Gather information from ALL the sources below, then produce a single structured 
 ### 2. Project history — what we've done
 
 - Read `AGENT.md` for project overview and objectives
-- Read the project's wiki page at `~/projects/memory/wiki/projects/{project-slug}.md` for lessons + reference
+- Read the project's page at `{WIKI_ROOT}/wiki/projects/{project-slug}.md` for lessons and reference, if it exists
 - Summarise git log: total commits, contributors, major milestones
 - Run: `git log --oneline --since="2 weeks ago"` for recent activity
 - Run: `git log --oneline --all | tail -5` for the earliest commits
@@ -632,7 +733,7 @@ Produce a briefing in this exact format:
 - **Open TODOs:** {count}
 
 ### Wiki page
-- Link to `~/projects/memory/wiki/projects/{slug}.md` (or NOTE if it doesn't exist yet — suggest creating it via the project-template skeleton)
+- Link to `{WIKI_ROOT}/wiki/projects/{slug}.md` (or note that it does not exist yet)
 
 ### Key Takeaways
 {2-3 bullet points: what's the most important thing to know right now}
@@ -666,38 +767,50 @@ Works across both supported agents:
 | **GitHub Copilot CLI** | `~/.copilot/session-state/{session-id}/events.jsonl` (+ `plan.md`, `checkpoints/`, `command-history-state.json`) | JSONL event stream — typed events (`session.start`, `session.mode_changed`, `turn.user`, `turn.assistant`, `tool.invoked`, …) with `timestamp`, `id`, `parentId` |
 | **Claude Code** | `~/.claude/projects/{project-hash}/{session-id}.jsonl` (+ `~/.claude/history.jsonl`) | JSONL conversation turns — `type: user|assistant|tool_use|tool_result` records with timestamps |
 
-## Arguments
+## Resolve the memory root
 
-Pass CLI arguments directly:
-- `--agent {copilot,claude,all}` — which agent's sessions to review. Default: `all`.
-- `--all` — review every session
-- `--project SLUG` — filter by project (matches the session's `cwd` / git root)
-- `--since YYYY-MM-DD` — date filtering
-- (no other args) — incremental, only new sessions since the last review
+1. If `memory/schema.md` exists in the current workspace, set `WIKI_ROOT` to `memory/`.
+2. Else if `schema.md` exists, set `WIKI_ROOT` to the current directory.
+3. Else follow the memory-wiki path in `AGENT.md`.
+4. If no folder containing both `schema.md` and `index.md` can be resolved, report the missing path and stop.
 
-## Step 1: Run the extraction script
+All `ops/...` paths below are relative to `WIKI_ROOT`.
 
-```powershell
-python ~/projects/memory/scripts/review-sessions.py $ARGUMENTS
-```
+## Scope modifiers
 
-The script must:
-1. Discover session files based on `--agent` (one or both source paths above).
-2. Normalize the per-agent schema into a common event model — turn (user / assistant), tool call, error, mode change, timestamp — so the downstream metrics work identically.
-3. Tag each session with `agent: "copilot" | "claude"` in the output so the LLM can split findings per agent when relevant.
+Interpret these optional modifiers from the user's request:
 
-If the script errors, diagnose and report. Do not proceed.
+- `--agent {copilot,claude,all}` — source to review; default `all`
+- `--all` — ignore the watermark and review every session
+- `--project SLUG` — match the session `cwd` or git root
+- `--since YYYY-MM-DD` — include sessions on or after this date
+- No modifiers — incremental review using `ops/review-state.json`
 
-> **Reference implementation note:** the script that ships alongside this skill in the author's private wiki originally handled Claude JSONL only. Extending it to also parse Copilot CLI `events.jsonl` is a straightforward additive change (new event-type mapping + per-agent path resolver). The skill description here is the agent-agnostic contract — the parser layer is responsible for matching it.
+## Step 1: Discover and normalize sessions directly
+
+Use the agent's native file listing, search, JSON/JSONL reading, and reasoning capabilities. **Do not require or create a helper extraction script.**
+
+1. Inventory session files for the selected agent source(s).
+2. For incremental mode, read `ops/review-state.json` if it exists and exclude namespaced file IDs already present in `watermark.reviewed_files`. A file ID is `copilot:{absolute-path}` or `claude:{absolute-path}`.
+3. Apply project and date filters before reading large files.
+4. Read each JSONL file in manageable chunks. Parse each line independently; count and report malformed lines instead of silently discarding them.
+5. Normalize records into this common in-memory model:
+   - `agent`: `copilot` or `claude`
+   - `session_id`, `timestamp`
+   - `kind`: `user_turn`, `assistant_turn`, `tool_call`, `tool_result`, `error`, or `mode_change`
+   - `text`, `tool_name`, `success`, `duration_ms` when available
+6. Copilot mapping: use event `type` values such as `turn.user`, `turn.assistant`, `tool.invoked`, tool completion/error events, and `session.mode_changed`.
+7. Claude mapping: use `type: user|assistant` records and nested `tool_use` / `tool_result` content; infer plan-mode changes only when explicitly represented.
+8. Keep the processed namespaced file IDs for the state update in Step 6.
 
 ## Step 2: Handle "nothing new"
 
-If the output contains `"status": "nothing_new"`, report:
+If the filtered inventory contains no unreviewed session files, report:
 - When the last review was performed
 - How many total sessions are available **per agent**
 - Suggest running with `--all` (and optionally `--agent copilot` or `--agent claude`) for a full review
 
-Stop here — do not generate a report.
+Stop here — do not generate an empty report or change the watermark.
 
 ## Step 3: Interpret the findings
 
@@ -733,7 +846,7 @@ Rules:
 
 ## Step 5: Save the full report
 
-Save to `ops/review-reports/YYYY-MM-DD.md`.
+Create `ops/review-reports/` if needed and save to `ops/review-reports/YYYY-MM-DD.md`.
 
 Format:
 
@@ -772,7 +885,7 @@ Format:
 
 Update `ops/review-state.json`:
 1. Set `watermark.last_review_date` to today's ISO date
-2. Append all processed file IDs to `watermark.reviewed_files` (from `meta.processed_file_ids` in the JSON output) — keys namespaced per agent (`copilot:{path}`, `claude:{path}`) so re-processing one agent doesn't invalidate the other
+2. Append the namespaced processed file IDs collected in Step 1 to `watermark.reviewed_files`, deduplicated, so re-processing one agent does not invalidate the other
 3. Append a trend snapshot to `trend_snapshots`:
    ```json
    {
@@ -806,7 +919,7 @@ Display to the user:
 
 ```yaml
 name: new-engagement
-description: "Scaffold one or more client engagement projects from ~/projects/project-template/: parse client + topic + format from the request, copy template files, create format-specific folders (slides/, demos/, exercises/, ...), pre-fill AGENT.md, create wiki memory page, init git. Trigger: 'new engagement', 'scaffold engagement', '/new-engagement'."
+description: "Scaffold client engagement projects from the installed project template: parse client, topic, format, and destination; create folders; pre-fill AGENT.md; create a wiki page; initialize git. Trigger: 'new engagement', 'scaffold engagement', '/new-engagement'."
 ```
 
 **Body** (save to all 3 paths — `.github/instructions/new-engagement.instructions.md`, `.claude/skills/new-engagement/SKILL.md`, `memory/workflows/new-engagement.md`):
@@ -814,23 +927,26 @@ description: "Scaffold one or more client engagement projects from ~/projects/pr
 ~~~markdown
 # New Engagement
 
-When the user says **"new engagement"**, **"scaffold engagement"**, or invokes a slash command like `/new-engagement`, scaffold one or more new client engagement projects from `~/projects/project-template/`.
+When the user says **"new engagement"**, **"scaffold engagement"**, or invokes a slash command like `/new-engagement`, scaffold one or more client engagement projects from the resolved project template.
 
-> **Prerequisites:** this skill expects a local clone of the project template at `~/projects/project-template/`. Set it up once:
->
-> ```bash
-> git clone --depth 1 https://github.com/ozgurkarahan/ai-agent-memory.git /tmp/aim
-> cp -R /tmp/aim/project-template ~/projects/project-template
-> rm -rf /tmp/aim
-> ```
->
-> The canonical template is shipped at [`project-template/`](https://github.com/ozgurkarahan/ai-agent-memory/tree/master/project-template) in this repo. If you customise it locally, keep it aligned with the canonical scaffold listed in Step 2b below.
+## Resolve required roots
+
+Before scaffolding:
+
+1. Resolve `WIKI_ROOT` using `memory/schema.md`, then `schema.md`, then the memory-wiki path declared in `AGENT.md`.
+2. Resolve `TEMPLATE_ROOT` by checking for `project-template/` beside `WIKI_ROOT`, then the path declared in `AGENT.md`.
+3. If the template is absent but network access is available, the agent may clone `https://github.com/ozgurkarahan/ai-agent-memory.git` into a temporary folder and use its `project-template/` directory.
+4. If either root remains unresolved, report the missing root and stop. Do not guess a personal path.
+5. Remove any temporary clone after scaffolding.
+
+All wiki paths below are relative to `WIKI_ROOT`.
 
 ## Step 1: Parse the request
 
 Extract from the user input:
 - **Client name** (e.g., "Acme", "Contoso", "Contoso")
 - **Topics** — one or more engagement topics, each with a format
+- **Projects root** — use an explicit destination from the request or `AGENT.md`; otherwise ask where to create the client workspace
 
 Expected input format: `<ClientName> — <topic1> (format), <topic2> (format)`
 
@@ -849,7 +965,7 @@ For each topic, do the following.
 ### 2a. Create project directory
 
 ```bash
-PROJECT_DIR=~/projects/{ClientName}/10-projects/{project-slug}
+PROJECT_DIR={PROJECTS_ROOT}/{ClientName}/10-projects/{project-slug}
 mkdir -p "$PROJECT_DIR"
 ```
 
@@ -859,7 +975,7 @@ The standard client workspace layout is `00-client/` (intel), `10-projects/` (de
 
 ### 2b. Copy template files
 
-Copy the **canonical files** from `~/projects/project-template/` per the post-2026-05-11 canonical contract documented in [[project-template]] page. The full canonical scaffold is:
+Copy the **canonical files** from `TEMPLATE_ROOT`. The full canonical scaffold is:
 
 ```
 {project}/
@@ -879,16 +995,12 @@ Copy the **canonical files** from `~/projects/project-template/` per the post-20
 ```
 
 ```bash
-# Easiest: clone the GitHub template repo, then strip .git
-git clone --depth 1 https://github.com/{your-username}/project-template "$PROJECT_DIR"
-rm -rf "$PROJECT_DIR/.git"
-
-# OR (offline/local) copy from the local clone:
-cp -R ~/projects/project-template/. "$PROJECT_DIR/"
+# Copy with the platform's native filesystem tools, then strip template history
+cp -R "$TEMPLATE_ROOT/." "$PROJECT_DIR/"
 rm -rf "$PROJECT_DIR/.git"
 ```
 
-After copying, verify the scaffold matches the canonical structure above. If `~/projects/project-template/` accumulates extra files not in the canonical list, **the wiki page wins** — clean the physical template, do not loosen the contract. See the 2026-05-11 lesson on [[project-template]] page.
+Use the platform-native equivalent on Windows. After copying, verify the scaffold matches the canonical structure above; do not copy unrelated files that may have accumulated beside the template.
 
 ### 2c. Create format-specific folders
 
@@ -936,12 +1048,15 @@ Replace the templated `AGENT.md` with engagement-specific content:
 |------|-------------|
 {format-specific paths}
 
+## Memory Wiki
+
+Root: `{resolved WIKI_ROOT}`
+
 ## Reference Documents
 
 | Document | Contents |
 |----------|----------|
-| `~/projects/memory/wiki/projects/{client-folder}/{project-slug}.md` (clients: `acme`, `fabrikam`, `contoso`, `northwind`) or `~/projects/memory/wiki/projects/{project-slug}.md` (non-client) | Canonical project memory page |
-| `~/projects/memory/wiki/clients/{client-slug}.md` | Client hub |
+| `{resolved WIKI_ROOT}/wiki/projects/{project-slug}.md` | Canonical project memory page |
 
 ## First Session Instructions
 
@@ -969,18 +1084,19 @@ When the agent is first launched in this project, follow these steps:
 
 ### 2e. Create the project memory page
 
-The canonical structure (per `wiki/projects/project-template.md`) does NOT include a `.claude/CLAUDE.md` per project. Project-specific context lives in two places:
+Project-specific context lives in two places:
 
 1. **`AGENT.md`** in the project repo — identity, workflow, conventions (single source of truth)
-2. **`~/projects/memory/wiki/projects/{client-folder}/{project-slug}.md`** — durable project memory (lessons, reference, technical details, related links). For known top-level clients (`acme`, `fabrikam`, `contoso`, `northwind`), file under the client folder. For non-client / personal / generic projects, file flat at `wiki/projects/{project-slug}.md`. See [[schema]] "Client-folder rule" for the slug-strip vs keep-prefix decision and [[internal-reorg-lesson]] for context.
+2. **`wiki/projects/{project-slug}.md`** under `WIKI_ROOT` — durable project memory (lessons, reference, technical details, related links).
 
-If a project memory page does not yet exist for this engagement, create one using the minimal skeleton from `wiki/projects/project-template.md`:
+Save the user's engagement request verbatim to `raw/data/new-engagement-{project-slug}-{YYYY-MM-DD}.md`. If a project memory page does not yet exist, create it with this minimal skeleton:
 
 ```markdown
 ---
 title: {Topic Title}
 category: projects
 tags: [{client-tag}, {topic-tags}]
+source_docs: ["raw/data/new-engagement-{project-slug}-{YYYY-MM-DD}.md"]
 date_created: {YYYY-MM-DD}
 date_updated: {YYYY-MM-DD}
 ---
@@ -992,9 +1108,10 @@ date_updated: {YYYY-MM-DD}
 ## Open actions
 ## Related
 ## Sources
+- `raw/data/new-engagement-{project-slug}-{YYYY-MM-DD}.md`
 ```
 
-Add the page entry to `wiki/projects/_index.md`, the root `index.md`, and append to `log.md`.
+Add the page entry to `wiki/projects/_index.md` when that index exists, update the Projects section and article count in `index.md`, and append to `log.md`.
 
 ### 2f. Git init
 
@@ -1018,7 +1135,7 @@ For each project, suggest both agent options. Use whichever CLI the user has ins
 
 **PowerShell (Windows):**
 ```powershell
-cd ~\projects\{ClientName}\10-projects\{project-slug}
+cd {actual-project-path}
 
 # GitHub Copilot CLI
 copilot --allow-all-tools
@@ -1029,7 +1146,7 @@ claude --dangerously-skip-permissions
 
 **Bash (Linux / macOS / Git Bash):**
 ```bash
-cd ~/projects/{ClientName}/10-projects/{project-slug}
+cd {actual-project-path}
 
 # GitHub Copilot CLI
 copilot --allow-all-tools
@@ -1042,7 +1159,7 @@ claude --dangerously-skip-permissions
 
 For each project, suggest a specific first prompt based on the topic and format. Pipe it to the agent with `-p`:
 ```powershell
-cd ~\projects\Acme\10-projects\agent-framework-engagement
+cd {actual-project-path}
 copilot --allow-all-tools -p "Research the latest agentic AI capabilities, then propose a presentation outline with demo scenarios for technical leadership"
 ```
 
@@ -1050,7 +1167,7 @@ copilot --allow-all-tools -p "Research the latest agentic AI capabilities, then 
 
 | Project | Path | Format | Status |
 |---------|------|--------|--------|
-| {topic} | `~/projects/{Client}/10-projects/{slug}/` | {format} | Scaffolded |
+| {topic} | `{actual-project-path}` | {format} | Scaffolded |
 ~~~
 
 ---
@@ -1203,20 +1320,20 @@ This is the master catalog of all wiki pages, grouped by category.
 
 ## Agent Config
 
-- [[workflow]] — Cross-project workflow rules
-- [[platform]] — Platform & environment preferences
+- [workflow](agent-config/workflow.md) — Cross-project workflow rules
+- [platform](agent-config/platform.md) — Platform & environment preferences
 
-## Skills (workflows installed)
+## Installed Workflows
 
-- [[ingest]] — Ingest a source into the wiki
-- [[end-session]] — Wrap up a coding session
-- [[query]] — Answer a question from the wiki
-- [[lint]] — Run wiki health checks
-- [[plan-week]] — Draft the Monday plan
-- [[close-week]] — Friday review + activity aggregation
-- [[project-status]] — 30-sec project briefing
-- [[review-sessions]] — Analyse past sessions for improvements
-- [[new-engagement]] — Scaffold a new client engagement
+- [ingest](workflows/ingest.md) — Ingest a source into the wiki
+- [end-session](workflows/end-session.md) — Wrap up a coding session
+- [query](workflows/query.md) — Answer a question from the wiki
+- [lint](workflows/lint.md) — Run wiki health checks
+- [plan-week](workflows/plan-week.md) — Draft the Monday plan
+- [close-week](workflows/close-week.md) — Friday review + activity aggregation
+- [project-status](workflows/project-status.md) — 30-sec project briefing
+- [review-sessions](workflows/review-sessions.md) — Analyse past sessions for improvements
+- [new-engagement](workflows/new-engagement.md) — Scaffold a new client engagement
 ```
 
 ---
@@ -1337,7 +1454,7 @@ The following skills are installed via tri-surface (both GitHub Copilot CLI and 
 
 | Skill | Trigger | Purpose |
 |---|---|---|
-| `ingest` | "ingest X" | Compile a source into a wiki page (7-phase pipeline) |
+| `ingest` | "ingest X" | Compile a source into the wiki with raw-source and graph checks |
 | `end-session` | "end session", "wrap up" | Capture lessons, update project page, git check |
 | `query` | "query X", "what do we know about X" | Answer a question with `[[wikilinks]]` |
 | `lint` | "lint", "health check" | Run wiki health checks, report findings |
@@ -1536,11 +1653,9 @@ All triggerable skills live under `.github/instructions/` and are auto-loaded vi
 
 ---
 
-### Step 11: Create the `project-template/` scaffold (optional but recommended)
+### Step 11: Create the required `project-template/` scaffold
 
-The `new-engagement` skill uses `project-template/` as the source of a one-shot copy when scaffolding a new client engagement. If you want `new-engagement` to work out-of-the-box, create the 9 files below at `project-template/<path>`.
-
-If you skip this step, `new-engagement` will instead clone the template at scaffold-time (slower, requires network).
+The `new-engagement` skill uses `project-template/` as its offline source when scaffolding a client engagement. Create all 9 files below at `project-template/<path>`; do not skip this step.
 
 ---
 
@@ -1598,14 +1713,14 @@ A minimal, agent-agnostic starting skeleton for any new project — designed to 
 
 ### Option 1 — `new-engagement` skill (automated)
 
-If you've adopted the `ai-agent-memory` wiki pattern and have this template cloned at `~/projects/project-template/`, just invoke the [`new-engagement`](https://github.com/ozgurkarahan/ai-agent-memory/blob/master/.github/instructions/new-engagement.instructions.md) skill — the agent copies this scaffold, pre-fills `AGENT.md`, creates format-specific folders, and initialises git.
+If you've adopted the `ai-agent-memory` wiki pattern, invoke the [`new-engagement`](https://github.com/ozgurkarahan/ai-agent-memory/blob/master/.github/instructions/new-engagement.instructions.md) skill. It resolves the installed template, copies this scaffold, pre-fills `AGENT.md`, creates format-specific folders, and initialises git.
 
 ### Option 2 — Manual copy
 
 ```bash
 # 1. Pick this template up
-cp -R <ai-agent-memory-clone>/project-template ~/projects/my-new-project
-cd ~/projects/my-new-project
+cp -R <ai-agent-memory-clone>/project-template <destination>
+cd <destination>
 rm -rf .git
 
 # 2. Edit AGENT.md to describe the project (overview, env, key paths, conventions)
@@ -1626,7 +1741,7 @@ When an agent first opens the scaffolded project:
 
 ## Pairing with the wiki
 
-This template assumes a central memory wiki lives at `~/projects/memory/` (or wherever you keep it). Project-specific lessons get graduated back to the wiki via the [`end-session`](https://github.com/ozgurkarahan/ai-agent-memory/blob/master/.github/instructions/end-session.instructions.md) skill at the end of each coding session — that's the loop that keeps the project's memory compounding instead of evaporating.
+Declare the installed memory-wiki root in `AGENT.md`. Project-specific lessons are graduated back to that wiki via the [`end-session`](https://github.com/ozgurkarahan/ai-agent-memory/blob/master/.github/instructions/end-session.instructions.md) skill at the end of each coding session — that's the loop that keeps project memory compounding instead of evaporating.
 
 ## License
 
@@ -1693,7 +1808,7 @@ venv/
 
 ## Workflow Rules
 
-Read `~/projects/memory/agent-config/workflow.md` for global rules. Key rules:
+The shared memory wiki root is `{MEMORY_WIKI_PATH}`. Replace this placeholder with the actual path when scaffolding the project, then read `{MEMORY_WIKI_PATH}/agent-config/workflow.md` for global rules.
 
 1. **Plan Before Coding** — For any task with 3+ steps, outline first.
 2. **Verify Before Done** — Never mark complete without proving it works.
@@ -1739,7 +1854,7 @@ Read these files for full context:
 - Use `@workspace` to give Copilot full project context
 - Pin important files in chat for persistent context
 - Use Copilot Edits (Ctrl+Shift+I) for multi-file changes
-- Run tests manually — Copilot cannot execute them
+- Run the project's available tests and checks before reporting completion
 ```
 
 ---
@@ -1755,20 +1870,20 @@ applyTo: "**"
 
 When the user says **"end session"**, **"wrap up"**, or **"done for today"**, wrap up the current coding session by capturing lessons and graduating them to the central memory wiki.
 
-This file is a **per-project shim**. The canonical procedure lives in the central memory wiki:
+This file is a **per-project shim**. Read `AGENT.md` and resolve the memory wiki root it declares. The canonical procedure is:
 
-- `~/projects/memory/.github/instructions/end-session.instructions.md` (Copilot CLI surface)
-- `~/projects/memory/.claude/skills/end-session/SKILL.md` (Claude Code surface)
-- `~/projects/memory/memory/workflows/end-session.md` (human-readable reference)
+- `{memory-root}/workflows/end-session.md`
+
+If `AGENT.md` does not declare a valid folder containing `schema.md` and `index.md`, report that wiki compounding is blocked and continue only with the Git check. Do not guess a home-directory path.
 
 ## Summary of steps (abridged)
 
-1. **Project wiki page** — Check if `~/projects/memory/wiki/projects/{project}.md` (or `wiki/projects/{client}/{project}.md` for client engagements) needs updates from today's work — lessons, decisions, technical details, status. Propose the changes.
+1. **Project wiki page** — Check if `{memory-root}/wiki/projects/{project}.md` needs updates from today's work — lessons, decisions, technical details, status. Propose the changes.
 2. **Wiki compounding** — If significant lessons or patterns were discovered:
-   - Update relevant domain pages at `~/projects/memory/wiki/domains/*.md`
-   - Add new glossary terms to `~/projects/memory/glossary.md`
+   - Update relevant domain pages under `{memory-root}/wiki/domains/`
+   - Add new glossary terms to `{memory-root}/glossary.md`
    - Create or update pattern / lesson pages if applicable
-   - Append an entry to `~/projects/memory/log.md`
+   - Append an entry to `{memory-root}/log.md`
 3. **Git check** — Run `git status` and warn about uncommitted changes.
 4. **Summary** — Present a table:
 
@@ -1815,7 +1930,7 @@ This file complements `AGENT.md` — `AGENT.md` is the single source of truth, t
 | Document | Contents |
 |----------|----------|
 | `AGENT.md` | Project identity + workflow rules + reference paths |
-| `~/projects/memory/` | Central memory wiki (if installed) — wiki, lessons, patterns, glossary |
+| Memory wiki path declared in `AGENT.md` | Shared wiki, lessons, patterns, and glossary |
 ```
 
 ---
@@ -1917,6 +2032,8 @@ The setup is complete only when every required item below passes. Inspect the fi
 [ ] SKILL GATE: 9 Claude SKILL.md files exist under .claude/skills/
 [ ] SKILL GATE: 9 agent-neutral workflow files exist under memory/workflows/
 [ ] SKILL GATE: all 9 skill bodies match across the 3 copies after frontmatter is removed
+[ ] DEPENDENCY GATE: no installed skill or template requires a helper script that this bootstrap does not create
+[ ] PORTABILITY GATE: no installed skill or template contains a maintainer-specific home-directory path
 [ ] memory/schema.md exists with YAML frontmatter
 [ ] memory/index.md exists with category sections
 [ ] memory/log.md exists with INIT entry
@@ -1928,7 +2045,7 @@ The setup is complete only when every required item below passes. Inspect the fi
 [ ] memory/wiki/{projects,domains,patterns,lessons,skills,agents,tools,_queries}/ directories exist
 [ ] memory/raw/ directory exists
 [ ] memory/ops/weekly/ directory exists and memory/ops/activity.jsonl exists (empty)
-[ ] project-template/ scaffold exists with 9 canonical files (if Step 11 was completed)
+[ ] project-template/ scaffold exists with all 9 canonical files
 [ ] AGENT.md exists at project root and references memory/agent-config/workflow.md + lists all 9 skills
 [ ] CLAUDE.md exists at project root and points to AGENT.md
 [ ] .github/copilot-instructions.md exists at project root and points to AGENT.md
@@ -1951,13 +2068,13 @@ Newly created skills may require a **new agent session** before GitHub Copilot C
 
 Setup is complete. Here's how to use your memory system:
 
-1. **Try your first ingest:** Tell your agent `ingest` followed by any topic you've learned today — a debugging breakthrough, a new tool, an architecture decision. The agent will compile it into a wiki page following the 7-phase pipeline.
+1. **Try your first ingest:** Tell your agent `ingest` followed by any topic you've learned today — a debugging breakthrough, a new tool, an architecture decision. The agent will preserve the raw source, compile durable knowledge, update the graph, and run its audit gates.
 
 2. **At the end of your session:** Tell your agent `end session` to capture lessons learned, update project docs, and compound knowledge.
 
 3. **Query your knowledge:** Ask your agent `query <question>` — it will search the wiki and synthesize an answer with `[[wikilink]]` citations.
 
-4. **Weekly rhythm:** On Monday, `plan week`. On Friday, `close week`. The activity log (`memory/ops/activity.jsonl`) accumulates events emitted by ingest/end-session, and `close-week` aggregates them into the week's file.
+4. **Weekly rhythm:** On Monday, `plan week`. On Friday, `close week`. The activity log (`memory/ops/activity.jsonl`) accumulates ingest events, and `close-week` aggregates them into the week's file.
 
 5. **Health checks:** Run `lint` periodically to surface orphan pages, broken wikilinks, and thin pages.
 
@@ -1965,18 +2082,6 @@ Setup is complete. Here's how to use your memory system:
 
 7. **New engagements:** When starting a new client engagement, say `new engagement <Client> — <topic> (<format>)` and the agent will scaffold the project from `project-template/`.
 
-8. **Session review:** Run `review sessions` to analyse your past coding sessions (Claude Code JSONL data) for workflow improvements.
+8. **Session review:** Run `review sessions` to analyse GitHub Copilot CLI and Claude Code JSONL data for workflow improvements.
 
 It compounds over time. Each session adds to the wiki. After a few weeks, your agent will have a rich knowledge base of your projects, patterns, and hard-won lessons — and it never forgets.
-
----
-
-## Updating this bootstrap
-
-If you add a new skill or modify the project-template, regenerate this file:
-
-```bash
-python scripts/regenerate-bootstrap.py
-```
-
-The generator reads the canonical skill bodies from `memory/workflows/{slug}.md` and the project-template files from `project-template/`, then writes the full self-contained bootstrap prompt to `bootstrap.md` (UTF-8). Use `-o <path>` to write elsewhere.

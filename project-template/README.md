@@ -21,14 +21,14 @@ A minimal, agent-agnostic starting skeleton for any new project — designed to 
 
 ### Option 1 — `new-engagement` skill (automated)
 
-If you've adopted the `ai-agent-memory` wiki pattern and have this template cloned at `~/projects/project-template/`, just invoke the [`new-engagement`](https://github.com/ozgurkarahan/ai-agent-memory/blob/master/.github/instructions/new-engagement.instructions.md) skill — the agent copies this scaffold, pre-fills `AGENT.md`, creates format-specific folders, and initialises git.
+If you've adopted the `ai-agent-memory` wiki pattern, invoke the [`new-engagement`](https://github.com/ozgurkarahan/ai-agent-memory/blob/master/.github/instructions/new-engagement.instructions.md) skill. It resolves the installed template, copies this scaffold, pre-fills `AGENT.md`, creates format-specific folders, and initialises git.
 
 ### Option 2 — Manual copy
 
 ```bash
 # 1. Pick this template up
-cp -R <ai-agent-memory-clone>/project-template ~/projects/my-new-project
-cd ~/projects/my-new-project
+cp -R <ai-agent-memory-clone>/project-template <destination>
+cd <destination>
 rm -rf .git
 
 # 2. Edit AGENT.md to describe the project (overview, env, key paths, conventions)
@@ -49,7 +49,7 @@ When an agent first opens the scaffolded project:
 
 ## Pairing with the wiki
 
-This template assumes a central memory wiki lives at `~/projects/memory/` (or wherever you keep it). Project-specific lessons get graduated back to the wiki via the [`end-session`](https://github.com/ozgurkarahan/ai-agent-memory/blob/master/.github/instructions/end-session.instructions.md) skill at the end of each coding session — that's the loop that keeps the project's memory compounding instead of evaporating.
+Declare the installed memory-wiki root in `AGENT.md`. Project-specific lessons are graduated back to that wiki via the [`end-session`](https://github.com/ozgurkarahan/ai-agent-memory/blob/master/.github/instructions/end-session.instructions.md) skill at the end of each coding session — that's the loop that keeps project memory compounding instead of evaporating.
 
 ## License
 

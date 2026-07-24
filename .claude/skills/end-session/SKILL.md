@@ -7,12 +7,21 @@ description: "Wrap up the current coding session: update the project wiki page w
 
 When the user says "end session", "wrap up", or "done for today":
 
-1. **Project wiki page** — Check if `~/projects/memory/wiki/projects/{project}.md` needs updates from today's work (lessons, decisions, technical details, status). Propose changes. *(Note: legacy `.ai/lessons-learned.md` / `.ai/project-reference.md` were retired 2026-04-22 — all project knowledge now lives directly on the wiki page.)*
+## Resolve the memory root
+
+1. If `memory/schema.md` exists in the current workspace, use `memory/`.
+2. Else if `schema.md` exists, use the current directory.
+3. Else follow the memory-wiki path declared in the current project's `AGENT.md`.
+4. If no folder containing both `schema.md` and `index.md` resolves, report that the wiki update is blocked; still perform the Git check.
+
+All wiki paths below are relative to that memory root.
+
+1. **Project wiki page** — Check if `wiki/projects/{project}.md` needs updates from today's work (lessons, decisions, technical details, status). Propose changes. *(Note: legacy `.ai/lessons-learned.md` / `.ai/project-reference.md` were retired — project knowledge lives directly on the wiki page.)*
 2. **Wiki compounding** — If significant lessons or patterns were discovered:
-   - Update relevant domain pages at `~/projects/memory/wiki/domains/*.md`
-   - Add new glossary terms to `~/projects/memory/glossary.md`
+   - Update relevant domain pages under `wiki/domains/`
+   - Add new glossary terms to `glossary.md`
    - Create or update pattern/lesson pages if applicable
-   - Append to `~/projects/memory/log.md`
+   - Append to `log.md`
 3. **Git check** — Run `git status` and warn about uncommitted changes.
 4. **Summary** — Present a table:
 

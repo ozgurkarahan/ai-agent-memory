@@ -47,12 +47,24 @@ TEMPLATE_FILES = [
 ]
 
 FRONTMATTER_RE = re.compile(r"^---\n.*?\n---\n", re.DOTALL)
+FORBIDDEN_CONSUMER_REFERENCES = {
+    "unshipped helper script": re.compile(r"(?<![\w.-])scripts[\\/][\w./\\-]+\.py\b", re.IGNORECASE),
+    "maintainer-specific memory path": re.compile(r"~[\\/]projects[\\/]memory\b", re.IGNORECASE),
+    "maintainer-specific template path": re.compile(r"~[\\/]projects[\\/]project-template\b", re.IGNORECASE),
+    "hardcoded Windows user path": re.compile(r"\b[A-Za-z]:\\Users\\[^\\\s]+\\", re.IGNORECASE),
+}
 
 
 def read_body(path: Path) -> str:
     """Read a markdown file and strip the leading YAML frontmatter block."""
     text = path.read_text(encoding="utf-8")
     return FRONTMATTER_RE.sub("", text, count=1).lstrip()
+
+
+def read_body_exact(path: Path) -> str:
+    """Strip frontmatter while preserving all body whitespace for parity checks."""
+    text = path.read_text(encoding="utf-8").replace("\r\n", "\n")
+    return FRONTMATTER_RE.sub("", text, count=1)
 
 
 def read_claude_description(slug: str) -> str:
@@ -68,6 +80,40 @@ def read_claude_description(slug: str) -> str:
 def read_file(rel: str) -> str:
     """Read a project-template file."""
     return (ROOT / "project-template" / rel).read_text(encoding="utf-8")
+
+
+def validate_consumer_text(text: str, origin: str) -> list[str]:
+    """Return consumer-facing dependency violations found in text."""
+    errors = []
+    for label, pattern in FORBIDDEN_CONSUMER_REFERENCES.items():
+        matches = sorted(set(match.group(0) for match in pattern.finditer(text)))
+        if matches:
+            errors.append(f"{origin}: {label}: {', '.join(matches)}")
+    return errors
+
+
+def validate_sources() -> None:
+    """Fail closed when source surfaces drift or require unshipped local files."""
+    errors = []
+    for slug in SKILLS:
+        paths = {
+            "workflow": ROOT / "memory" / "workflows" / f"{slug}.md",
+            "Copilot": ROOT / ".github" / "instructions" / f"{slug}.instructions.md",
+            "Claude": ROOT / ".claude" / "skills" / slug / "SKILL.md",
+        }
+        bodies = {surface: read_body_exact(path) for surface, path in paths.items()}
+        canonical = bodies["workflow"]
+        for surface, body in bodies.items():
+            if body != canonical:
+                errors.append(f"{slug}: {surface} body differs from memory/workflows/{slug}.md")
+        errors.extend(validate_consumer_text(canonical, f"skill {slug}"))
+
+    for rel in TEMPLATE_FILES:
+        errors.extend(validate_consumer_text(read_file(rel), f"project-template/{rel}"))
+
+    if errors:
+        details = "\n- ".join(errors)
+        raise ValueError(f"Bootstrap source validation failed:\n- {details}")
 
 
 def fence(content: str, lang: str = "markdown") -> str:
@@ -185,7 +231,7 @@ project-root/
 │   └── ops/                                    # Operational state for plan-week/close-week
 │       ├── weekly/                             # ISO week files (e.g., 2026-W18.md)
 │       └── activity.jsonl                      # Append-only event log
-└── project-template/                           # Optional: scaffold for new engagements (Step 11)
+└── project-template/                           # Required offline scaffold for new engagements (Step 11)
 ```
 
 Create all directories (including empty ones like `raw/`, `wiki/projects/`, `memory/ops/weekly/`).
@@ -330,20 +376,20 @@ This is the master catalog of all wiki pages, grouped by category.
 
 ## Agent Config
 
-- [[workflow]] — Cross-project workflow rules
-- [[platform]] — Platform & environment preferences
+- [workflow](agent-config/workflow.md) — Cross-project workflow rules
+- [platform](agent-config/platform.md) — Platform & environment preferences
 
-## Skills (workflows installed)
+## Installed Workflows
 
-- [[ingest]] — Ingest a source into the wiki
-- [[end-session]] — Wrap up a coding session
-- [[query]] — Answer a question from the wiki
-- [[lint]] — Run wiki health checks
-- [[plan-week]] — Draft the Monday plan
-- [[close-week]] — Friday review + activity aggregation
-- [[project-status]] — 30-sec project briefing
-- [[review-sessions]] — Analyse past sessions for improvements
-- [[new-engagement]] — Scaffold a new client engagement
+- [ingest](workflows/ingest.md) — Ingest a source into the wiki
+- [end-session](workflows/end-session.md) — Wrap up a coding session
+- [query](workflows/query.md) — Answer a question from the wiki
+- [lint](workflows/lint.md) — Run wiki health checks
+- [plan-week](workflows/plan-week.md) — Draft the Monday plan
+- [close-week](workflows/close-week.md) — Friday review + activity aggregation
+- [project-status](workflows/project-status.md) — 30-sec project briefing
+- [review-sessions](workflows/review-sessions.md) — Analyse past sessions for improvements
+- [new-engagement](workflows/new-engagement.md) — Scaffold a new client engagement
 ```
 
 ---
@@ -473,7 +519,7 @@ The following skills are installed via tri-surface (both GitHub Copilot CLI and 
 
 | Skill | Trigger | Purpose |
 |---|---|---|
-| `ingest` | "ingest X" | Compile a source into a wiki page (7-phase pipeline) |
+| `ingest` | "ingest X" | Compile a source into the wiki with raw-source and graph checks |
 | `end-session` | "end session", "wrap up" | Capture lessons, update project page, git check |
 | `query` | "query X", "what do we know about X" | Answer a question with `[[wikilinks]]` |
 | `lint` | "lint", "health check" | Run wiki health checks, report findings |
@@ -742,9 +788,8 @@ All triggerable skills live under `.github/instructions/` and are auto-loaded vi
 def section_project_template() -> str:
     """Generate Step 11 — the project-template/ scaffold."""
     parts = [
-        "### Step 11: Create the `project-template/` scaffold (optional but recommended)\n",
-        "The `new-engagement` skill uses `project-template/` as the source of a one-shot copy when scaffolding a new client engagement. If you want `new-engagement` to work out-of-the-box, create the 9 files below at `project-template/<path>`.\n",
-        "If you skip this step, `new-engagement` will instead clone the template at scaffold-time (slower, requires network).\n",
+        "### Step 11: Create the required `project-template/` scaffold\n",
+        "The `new-engagement` skill uses `project-template/` as its offline source when scaffolding a client engagement. Create all 9 files below at `project-template/<path>`; do not skip this step.\n",
         "---\n",
     ]
     for rel in TEMPLATE_FILES:
@@ -774,6 +819,8 @@ The setup is complete only when every required item below passes. Inspect the fi
 [ ] SKILL GATE: 9 Claude SKILL.md files exist under .claude/skills/
 [ ] SKILL GATE: 9 agent-neutral workflow files exist under memory/workflows/
 [ ] SKILL GATE: all 9 skill bodies match across the 3 copies after frontmatter is removed
+[ ] DEPENDENCY GATE: no installed skill or template requires a helper script that this bootstrap does not create
+[ ] PORTABILITY GATE: no installed skill or template contains a maintainer-specific home-directory path
 [ ] memory/schema.md exists with YAML frontmatter
 [ ] memory/index.md exists with category sections
 [ ] memory/log.md exists with INIT entry
@@ -785,7 +832,7 @@ The setup is complete only when every required item below passes. Inspect the fi
 [ ] memory/wiki/{projects,domains,patterns,lessons,skills,agents,tools,_queries}/ directories exist
 [ ] memory/raw/ directory exists
 [ ] memory/ops/weekly/ directory exists and memory/ops/activity.jsonl exists (empty)
-[ ] project-template/ scaffold exists with 9 canonical files (if Step 11 was completed)
+[ ] project-template/ scaffold exists with all 9 canonical files
 [ ] AGENT.md exists at project root and references memory/agent-config/workflow.md + lists all 9 skills
 [ ] CLAUDE.md exists at project root and points to AGENT.md
 [ ] .github/copilot-instructions.md exists at project root and points to AGENT.md
@@ -811,13 +858,13 @@ def section_next_steps() -> str:
 
 Setup is complete. Here's how to use your memory system:
 
-1. **Try your first ingest:** Tell your agent `ingest` followed by any topic you've learned today — a debugging breakthrough, a new tool, an architecture decision. The agent will compile it into a wiki page following the 7-phase pipeline.
+1. **Try your first ingest:** Tell your agent `ingest` followed by any topic you've learned today — a debugging breakthrough, a new tool, an architecture decision. The agent will preserve the raw source, compile durable knowledge, update the graph, and run its audit gates.
 
 2. **At the end of your session:** Tell your agent `end session` to capture lessons learned, update project docs, and compound knowledge.
 
 3. **Query your knowledge:** Ask your agent `query <question>` — it will search the wiki and synthesize an answer with `[[wikilink]]` citations.
 
-4. **Weekly rhythm:** On Monday, `plan week`. On Friday, `close week`. The activity log (`memory/ops/activity.jsonl`) accumulates events emitted by ingest/end-session, and `close-week` aggregates them into the week's file.
+4. **Weekly rhythm:** On Monday, `plan week`. On Friday, `close week`. The activity log (`memory/ops/activity.jsonl`) accumulates ingest events, and `close-week` aggregates them into the week's file.
 
 5. **Health checks:** Run `lint` periodically to surface orphan pages, broken wikilinks, and thin pages.
 
@@ -825,21 +872,9 @@ Setup is complete. Here's how to use your memory system:
 
 7. **New engagements:** When starting a new client engagement, say `new engagement <Client> — <topic> (<format>)` and the agent will scaffold the project from `project-template/`.
 
-8. **Session review:** Run `review sessions` to analyse your past coding sessions (Claude Code JSONL data) for workflow improvements.
+8. **Session review:** Run `review sessions` to analyse GitHub Copilot CLI and Claude Code JSONL data for workflow improvements.
 
 It compounds over time. Each session adds to the wiki. After a few weeks, your agent will have a rich knowledge base of your projects, patterns, and hard-won lessons — and it never forgets.
-
----
-
-## Updating this bootstrap
-
-If you add a new skill or modify the project-template, regenerate this file:
-
-```bash
-python scripts/regenerate-bootstrap.py
-```
-
-The generator reads the canonical skill bodies from `memory/workflows/{slug}.md` and the project-template files from `project-template/`, then writes the full self-contained bootstrap prompt to `bootstrap.md` (UTF-8). Use `-o <path>` to write elsewhere.
 """
 
 
@@ -852,6 +887,8 @@ def main() -> None:
         help="Path to write bootstrap.md (default: <repo>/bootstrap.md)",
     )
     args = parser.parse_args()
+
+    validate_sources()
 
     out = []
     out.append(HEADER)
@@ -870,6 +907,9 @@ def main() -> None:
 
     final = "\n".join(out)
     final = final.replace("\r\n", "\n").rstrip() + "\n"
+    consumer_errors = validate_consumer_text(final, "generated bootstrap")
+    if consumer_errors:
+        raise ValueError("Generated bootstrap dependency validation failed:\n- " + "\n- ".join(consumer_errors))
 
     # Write directly as UTF-8 bytes — never go through stdout (Windows
     # PowerShell `>` redirect re-encodes the stream and produces mojibake).

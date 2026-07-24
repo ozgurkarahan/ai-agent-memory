@@ -6,20 +6,20 @@ applyTo: "**"
 
 When the user says **"end session"**, **"wrap up"**, or **"done for today"**, wrap up the current coding session by capturing lessons and graduating them to the central memory wiki.
 
-This file is a **per-project shim**. The canonical procedure lives in the central memory wiki:
+This file is a **per-project shim**. Read `AGENT.md` and resolve the memory wiki root it declares. The canonical procedure is:
 
-- `~/projects/memory/.github/instructions/end-session.instructions.md` (Copilot CLI surface)
-- `~/projects/memory/.claude/skills/end-session/SKILL.md` (Claude Code surface)
-- `~/projects/memory/memory/workflows/end-session.md` (human-readable reference)
+- `{memory-root}/workflows/end-session.md`
+
+If `AGENT.md` does not declare a valid folder containing `schema.md` and `index.md`, report that wiki compounding is blocked and continue only with the Git check. Do not guess a home-directory path.
 
 ## Summary of steps (abridged)
 
-1. **Project wiki page** — Check if `~/projects/memory/wiki/projects/{project}.md` (or `wiki/projects/{client}/{project}.md` for client engagements) needs updates from today's work — lessons, decisions, technical details, status. Propose the changes.
+1. **Project wiki page** — Check if `{memory-root}/wiki/projects/{project}.md` needs updates from today's work — lessons, decisions, technical details, status. Propose the changes.
 2. **Wiki compounding** — If significant lessons or patterns were discovered:
-   - Update relevant domain pages at `~/projects/memory/wiki/domains/*.md`
-   - Add new glossary terms to `~/projects/memory/glossary.md`
+   - Update relevant domain pages under `{memory-root}/wiki/domains/`
+   - Add new glossary terms to `{memory-root}/glossary.md`
    - Create or update pattern / lesson pages if applicable
-   - Append an entry to `~/projects/memory/log.md`
+   - Append an entry to `{memory-root}/log.md`
 3. **Git check** — Run `git status` and warn about uncommitted changes.
 4. **Summary** — Present a table:
 

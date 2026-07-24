@@ -6,13 +6,19 @@ applyTo: "**"
 
 When the user says **"project status"**, **"status briefing"**, or invokes `/project-status` from inside any project directory (NOT memory itself), produce a complete situational-awareness briefing so the user can get up to speed on that project in 30 seconds.
 
-> This skill is for ANY child project (e.g., `~/projects/Acme/10-projects/agent-framework-engagement`). When invoked from `~/projects/memory/` it should refuse and direct the user to the wiki instead (the wiki IS memory's status).
+> This skill is for any child project. When invoked from the memory system itself, refuse and direct the user to the wiki because the wiki is its status.
 >
 > **Coexists with the per-project `/status` command** that ships in every scaffolded project under `.claude/commands/status.md`. The per-project version is Claude-Code-specific. THIS memory skill is the agent-agnostic version (works under GitHub Copilot CLI, Claude Code, or any tool that loads `.github/instructions/`). When both are available, prefer the per-project one if you are inside Claude Code (richer integration), otherwise use this skill.
 
 ## Instructions
 
 Gather information from ALL the sources below, then produce a single structured briefing. Use parallel tool calls to speed up the research.
+
+### Resolve the memory root
+
+1. If the current project contains `schema.md` or `memory/schema.md`, it is the memory system or its installer; refuse as described above.
+2. Otherwise follow the memory-wiki path declared in the child project's `AGENT.md`.
+3. If no memory root resolves, continue the codebase briefing but mark the wiki page as unavailable instead of guessing a personal path.
 
 ### 1. Codebase analysis
 
@@ -25,7 +31,7 @@ Gather information from ALL the sources below, then produce a single structured 
 ### 2. Project history — what we've done
 
 - Read `AGENT.md` for project overview and objectives
-- Read the project's wiki page at `~/projects/memory/wiki/projects/{project-slug}.md` for lessons + reference
+- Read the project's page at `{WIKI_ROOT}/wiki/projects/{project-slug}.md` for lessons and reference, if it exists
 - Summarise git log: total commits, contributors, major milestones
 - Run: `git log --oneline --since="2 weeks ago"` for recent activity
 - Run: `git log --oneline --all | tail -5` for the earliest commits
@@ -85,7 +91,7 @@ Produce a briefing in this exact format:
 - **Open TODOs:** {count}
 
 ### Wiki page
-- Link to `~/projects/memory/wiki/projects/{slug}.md` (or NOTE if it doesn't exist yet — suggest creating it via the project-template skeleton)
+- Link to `{WIKI_ROOT}/wiki/projects/{slug}.md` (or note that it does not exist yet)
 
 ### Key Takeaways
 {2-3 bullet points: what's the most important thing to know right now}

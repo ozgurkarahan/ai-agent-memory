@@ -24,7 +24,7 @@
 
 ## Workflow Rules
 
-Read `~/projects/memory/agent-config/workflow.md` for global rules. Key rules:
+The shared memory wiki root is `{MEMORY_WIKI_PATH}`. Replace this placeholder with the actual path when scaffolding the project, then read `{MEMORY_WIKI_PATH}/agent-config/workflow.md` for global rules.
 
 1. **Plan Before Coding** — For any task with 3+ steps, outline first.
 2. **Verify Before Done** — Never mark complete without proving it works.

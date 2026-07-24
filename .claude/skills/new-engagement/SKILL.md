@@ -1,27 +1,30 @@
 ---
 name: new-engagement
-description: "Scaffold one or more client engagement projects from ~/projects/project-template/: parse client + topic + format from the request, copy template files, create format-specific folders (slides/, demos/, exercises/, ...), pre-fill AGENT.md, create wiki memory page, init git. Trigger: 'new engagement', 'scaffold engagement', '/new-engagement'."
+description: "Scaffold client engagement projects from the installed project template: parse client, topic, format, and destination; create folders; pre-fill AGENT.md; create a wiki page; initialize git. Trigger: 'new engagement', 'scaffold engagement', '/new-engagement'."
 ---
 
 # New Engagement
 
-When the user says **"new engagement"**, **"scaffold engagement"**, or invokes a slash command like `/new-engagement`, scaffold one or more new client engagement projects from `~/projects/project-template/`.
+When the user says **"new engagement"**, **"scaffold engagement"**, or invokes a slash command like `/new-engagement`, scaffold one or more client engagement projects from the resolved project template.
 
-> **Prerequisites:** this skill expects a local clone of the project template at `~/projects/project-template/`. Set it up once:
->
-> ```bash
-> git clone --depth 1 https://github.com/ozgurkarahan/ai-agent-memory.git /tmp/aim
-> cp -R /tmp/aim/project-template ~/projects/project-template
-> rm -rf /tmp/aim
-> ```
->
-> The canonical template is shipped at [`project-template/`](https://github.com/ozgurkarahan/ai-agent-memory/tree/master/project-template) in this repo. If you customise it locally, keep it aligned with the canonical scaffold listed in Step 2b below.
+## Resolve required roots
+
+Before scaffolding:
+
+1. Resolve `WIKI_ROOT` using `memory/schema.md`, then `schema.md`, then the memory-wiki path declared in `AGENT.md`.
+2. Resolve `TEMPLATE_ROOT` by checking for `project-template/` beside `WIKI_ROOT`, then the path declared in `AGENT.md`.
+3. If the template is absent but network access is available, the agent may clone `https://github.com/ozgurkarahan/ai-agent-memory.git` into a temporary folder and use its `project-template/` directory.
+4. If either root remains unresolved, report the missing root and stop. Do not guess a personal path.
+5. Remove any temporary clone after scaffolding.
+
+All wiki paths below are relative to `WIKI_ROOT`.
 
 ## Step 1: Parse the request
 
 Extract from the user input:
 - **Client name** (e.g., "Acme", "Contoso", "Contoso")
 - **Topics** — one or more engagement topics, each with a format
+- **Projects root** — use an explicit destination from the request or `AGENT.md`; otherwise ask where to create the client workspace
 
 Expected input format: `<ClientName> — <topic1> (format), <topic2> (format)`
 
@@ -40,7 +43,7 @@ For each topic, do the following.
 ### 2a. Create project directory
 
 ```bash
-PROJECT_DIR=~/projects/{ClientName}/10-projects/{project-slug}
+PROJECT_DIR={PROJECTS_ROOT}/{ClientName}/10-projects/{project-slug}
 mkdir -p "$PROJECT_DIR"
 ```
 
@@ -50,7 +53,7 @@ The standard client workspace layout is `00-client/` (intel), `10-projects/` (de
 
 ### 2b. Copy template files
 
-Copy the **canonical files** from `~/projects/project-template/` per the post-2026-05-11 canonical contract documented in [[project-template]] page. The full canonical scaffold is:
+Copy the **canonical files** from `TEMPLATE_ROOT`. The full canonical scaffold is:
 
 ```
 {project}/
@@ -70,16 +73,12 @@ Copy the **canonical files** from `~/projects/project-template/` per the post-20
 ```
 
 ```bash
-# Easiest: clone the GitHub template repo, then strip .git
-git clone --depth 1 https://github.com/{your-username}/project-template "$PROJECT_DIR"
-rm -rf "$PROJECT_DIR/.git"
-
-# OR (offline/local) copy from the local clone:
-cp -R ~/projects/project-template/. "$PROJECT_DIR/"
+# Copy with the platform's native filesystem tools, then strip template history
+cp -R "$TEMPLATE_ROOT/." "$PROJECT_DIR/"
 rm -rf "$PROJECT_DIR/.git"
 ```
 
-After copying, verify the scaffold matches the canonical structure above. If `~/projects/project-template/` accumulates extra files not in the canonical list, **the wiki page wins** — clean the physical template, do not loosen the contract. See the 2026-05-11 lesson on [[project-template]] page.
+Use the platform-native equivalent on Windows. After copying, verify the scaffold matches the canonical structure above; do not copy unrelated files that may have accumulated beside the template.
 
 ### 2c. Create format-specific folders
 
@@ -127,12 +126,15 @@ Replace the templated `AGENT.md` with engagement-specific content:
 |------|-------------|
 {format-specific paths}
 
+## Memory Wiki
+
+Root: `{resolved WIKI_ROOT}`
+
 ## Reference Documents
 
 | Document | Contents |
 |----------|----------|
-| `~/projects/memory/wiki/projects/{client-folder}/{project-slug}.md` (clients: `acme`, `fabrikam`, `contoso`, `northwind`) or `~/projects/memory/wiki/projects/{project-slug}.md` (non-client) | Canonical project memory page |
-| `~/projects/memory/wiki/clients/{client-slug}.md` | Client hub |
+| `{resolved WIKI_ROOT}/wiki/projects/{project-slug}.md` | Canonical project memory page |
 
 ## First Session Instructions
 
@@ -160,18 +162,19 @@ When the agent is first launched in this project, follow these steps:
 
 ### 2e. Create the project memory page
 
-The canonical structure (per `wiki/projects/project-template.md`) does NOT include a `.claude/CLAUDE.md` per project. Project-specific context lives in two places:
+Project-specific context lives in two places:
 
 1. **`AGENT.md`** in the project repo — identity, workflow, conventions (single source of truth)
-2. **`~/projects/memory/wiki/projects/{client-folder}/{project-slug}.md`** — durable project memory (lessons, reference, technical details, related links). For known top-level clients (`acme`, `fabrikam`, `contoso`, `northwind`), file under the client folder. For non-client / personal / generic projects, file flat at `wiki/projects/{project-slug}.md`. See [[schema]] "Client-folder rule" for the slug-strip vs keep-prefix decision and [[internal-reorg-lesson]] for context.
+2. **`wiki/projects/{project-slug}.md`** under `WIKI_ROOT` — durable project memory (lessons, reference, technical details, related links).
 
-If a project memory page does not yet exist for this engagement, create one using the minimal skeleton from `wiki/projects/project-template.md`:
+Save the user's engagement request verbatim to `raw/data/new-engagement-{project-slug}-{YYYY-MM-DD}.md`. If a project memory page does not yet exist, create it with this minimal skeleton:
 
 ```markdown
 ---
 title: {Topic Title}
 category: projects
 tags: [{client-tag}, {topic-tags}]
+source_docs: ["raw/data/new-engagement-{project-slug}-{YYYY-MM-DD}.md"]
 date_created: {YYYY-MM-DD}
 date_updated: {YYYY-MM-DD}
 ---
@@ -183,9 +186,10 @@ date_updated: {YYYY-MM-DD}
 ## Open actions
 ## Related
 ## Sources
+- `raw/data/new-engagement-{project-slug}-{YYYY-MM-DD}.md`
 ```
 
-Add the page entry to `wiki/projects/_index.md`, the root `index.md`, and append to `log.md`.
+Add the page entry to `wiki/projects/_index.md` when that index exists, update the Projects section and article count in `index.md`, and append to `log.md`.
 
 ### 2f. Git init
 
@@ -209,7 +213,7 @@ For each project, suggest both agent options. Use whichever CLI the user has ins
 
 **PowerShell (Windows):**
 ```powershell
-cd ~\projects\{ClientName}\10-projects\{project-slug}
+cd {actual-project-path}
 
 # GitHub Copilot CLI
 copilot --allow-all-tools
@@ -220,7 +224,7 @@ claude --dangerously-skip-permissions
 
 **Bash (Linux / macOS / Git Bash):**
 ```bash
-cd ~/projects/{ClientName}/10-projects/{project-slug}
+cd {actual-project-path}
 
 # GitHub Copilot CLI
 copilot --allow-all-tools
@@ -233,7 +237,7 @@ claude --dangerously-skip-permissions
 
 For each project, suggest a specific first prompt based on the topic and format. Pipe it to the agent with `-p`:
 ```powershell
-cd ~\projects\Acme\10-projects\agent-framework-engagement
+cd {actual-project-path}
 copilot --allow-all-tools -p "Research the latest agentic AI capabilities, then propose a presentation outline with demo scenarios for technical leadership"
 ```
 
@@ -241,4 +245,4 @@ copilot --allow-all-tools -p "Research the latest agentic AI capabilities, then 
 
 | Project | Path | Format | Status |
 |---------|------|--------|--------|
-| {topic} | `~/projects/{Client}/10-projects/{slug}/` | {format} | Scaffolded |
+| {topic} | `{actual-project-path}` | {format} | Scaffolded |

@@ -25,4 +25,4 @@ This file complements `AGENT.md` — `AGENT.md` is the single source of truth, t
 | Document | Contents |
 |----------|----------|
 | `AGENT.md` | Project identity + workflow rules + reference paths |
-| `~/projects/memory/` | Central memory wiki (if installed) — wiki, lessons, patterns, glossary |
+| Memory wiki path declared in `AGENT.md` | Shared wiki, lessons, patterns, and glossary |

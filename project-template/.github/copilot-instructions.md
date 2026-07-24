@@ -9,4 +9,4 @@ Read these files for full context:
 - Use `@workspace` to give Copilot full project context
 - Pin important files in chat for persistent context
 - Use Copilot Edits (Ctrl+Shift+I) for multi-file changes
-- Run tests manually — Copilot cannot execute them
+- Run the project's available tests and checks before reporting completion

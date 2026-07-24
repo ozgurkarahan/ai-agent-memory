@@ -19,9 +19,9 @@ This repo includes three core workflows that agents follow to maintain and use t
 
 **What it does:** Compiles new knowledge into a wiki page, connects it to the graph (backlinks, index, glossary), and preserves the raw source.
 
-**Key rule:** Target 8–15 files touched per ingest. If you only touched 2–3, you missed graph updates.
+**Key rule:** Touch every file required for raw provenance and graph consistency, without padding the change count. The activity event and final report must agree on the exact distinct paths changed.
 
-**7 Phases:** Gather Context → Classify → Compile → Update Graph → Copy Raw → Self-Audit → Report
+**Pipeline:** Resolve Root → Gather Context → Classify & Compile → Update Graph → Preserve Raw Source → Lint → Self-Audit → Emit Activity → Report
 
 📄 **Full specification:** [`memory/workflows/ingest.md`](../memory/workflows/ingest.md)
 

@@ -13,38 +13,50 @@ Works across both supported agents:
 | **GitHub Copilot CLI** | `~/.copilot/session-state/{session-id}/events.jsonl` (+ `plan.md`, `checkpoints/`, `command-history-state.json`) | JSONL event stream — typed events (`session.start`, `session.mode_changed`, `turn.user`, `turn.assistant`, `tool.invoked`, …) with `timestamp`, `id`, `parentId` |
 | **Claude Code** | `~/.claude/projects/{project-hash}/{session-id}.jsonl` (+ `~/.claude/history.jsonl`) | JSONL conversation turns — `type: user|assistant|tool_use|tool_result` records with timestamps |
 
-## Arguments
+## Resolve the memory root
 
-Pass CLI arguments directly:
-- `--agent {copilot,claude,all}` — which agent's sessions to review. Default: `all`.
-- `--all` — review every session
-- `--project SLUG` — filter by project (matches the session's `cwd` / git root)
-- `--since YYYY-MM-DD` — date filtering
-- (no other args) — incremental, only new sessions since the last review
+1. If `memory/schema.md` exists in the current workspace, set `WIKI_ROOT` to `memory/`.
+2. Else if `schema.md` exists, set `WIKI_ROOT` to the current directory.
+3. Else follow the memory-wiki path in `AGENT.md`.
+4. If no folder containing both `schema.md` and `index.md` can be resolved, report the missing path and stop.
 
-## Step 1: Run the extraction script
+All `ops/...` paths below are relative to `WIKI_ROOT`.
 
-```powershell
-python ~/projects/memory/scripts/review-sessions.py $ARGUMENTS
-```
+## Scope modifiers
 
-The script must:
-1. Discover session files based on `--agent` (one or both source paths above).
-2. Normalize the per-agent schema into a common event model — turn (user / assistant), tool call, error, mode change, timestamp — so the downstream metrics work identically.
-3. Tag each session with `agent: "copilot" | "claude"` in the output so the LLM can split findings per agent when relevant.
+Interpret these optional modifiers from the user's request:
 
-If the script errors, diagnose and report. Do not proceed.
+- `--agent {copilot,claude,all}` — source to review; default `all`
+- `--all` — ignore the watermark and review every session
+- `--project SLUG` — match the session `cwd` or git root
+- `--since YYYY-MM-DD` — include sessions on or after this date
+- No modifiers — incremental review using `ops/review-state.json`
 
-> **Reference implementation note:** the script that ships alongside this skill in the author's private wiki originally handled Claude JSONL only. Extending it to also parse Copilot CLI `events.jsonl` is a straightforward additive change (new event-type mapping + per-agent path resolver). The skill description here is the agent-agnostic contract — the parser layer is responsible for matching it.
+## Step 1: Discover and normalize sessions directly
+
+Use the agent's native file listing, search, JSON/JSONL reading, and reasoning capabilities. **Do not require or create a helper extraction script.**
+
+1. Inventory session files for the selected agent source(s).
+2. For incremental mode, read `ops/review-state.json` if it exists and exclude namespaced file IDs already present in `watermark.reviewed_files`. A file ID is `copilot:{absolute-path}` or `claude:{absolute-path}`.
+3. Apply project and date filters before reading large files.
+4. Read each JSONL file in manageable chunks. Parse each line independently; count and report malformed lines instead of silently discarding them.
+5. Normalize records into this common in-memory model:
+   - `agent`: `copilot` or `claude`
+   - `session_id`, `timestamp`
+   - `kind`: `user_turn`, `assistant_turn`, `tool_call`, `tool_result`, `error`, or `mode_change`
+   - `text`, `tool_name`, `success`, `duration_ms` when available
+6. Copilot mapping: use event `type` values such as `turn.user`, `turn.assistant`, `tool.invoked`, tool completion/error events, and `session.mode_changed`.
+7. Claude mapping: use `type: user|assistant` records and nested `tool_use` / `tool_result` content; infer plan-mode changes only when explicitly represented.
+8. Keep the processed namespaced file IDs for the state update in Step 6.
 
 ## Step 2: Handle "nothing new"
 
-If the output contains `"status": "nothing_new"`, report:
+If the filtered inventory contains no unreviewed session files, report:
 - When the last review was performed
 - How many total sessions are available **per agent**
 - Suggest running with `--all` (and optionally `--agent copilot` or `--agent claude`) for a full review
 
-Stop here — do not generate a report.
+Stop here — do not generate an empty report or change the watermark.
 
 ## Step 3: Interpret the findings
 
@@ -80,7 +92,7 @@ Rules:
 
 ## Step 5: Save the full report
 
-Save to `ops/review-reports/YYYY-MM-DD.md`.
+Create `ops/review-reports/` if needed and save to `ops/review-reports/YYYY-MM-DD.md`.
 
 Format:
 
@@ -119,7 +131,7 @@ Format:
 
 Update `ops/review-state.json`:
 1. Set `watermark.last_review_date` to today's ISO date
-2. Append all processed file IDs to `watermark.reviewed_files` (from `meta.processed_file_ids` in the JSON output) — keys namespaced per agent (`copilot:{path}`, `claude:{path}`) so re-processing one agent doesn't invalidate the other
+2. Append the namespaced processed file IDs collected in Step 1 to `watermark.reviewed_files`, deduplicated, so re-processing one agent does not invalidate the other
 3. Append a trend snapshot to `trend_snapshots`:
    ```json
    {

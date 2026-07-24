@@ -59,7 +59,7 @@ $EDITOR memory/agent-config/platform.md
 
 You don't need to set anything up manually. Just give [`bootstrap.md`](bootstrap.md) to your AI coding agent — it contains step-by-step instructions that the agent will follow to create the entire memory system.
 
-`bootstrap.md` is **fully self-contained** (~80 KB, no network access required). It installs all 9 skills in the two native agent locations (`.github/instructions/` and `.claude/skills/`) plus an agent-neutral copy under `memory/workflows/`. Skills are installed before wiki content, and the bootstrap cannot report success until its Definition of Done confirms all 27 skill files.
+`bootstrap.md` is **fully self-contained** (~80 KB, no network access required). It installs all 9 skills in the two native agent locations (`.github/instructions/` and `.claude/skills/`) plus an agent-neutral copy under `memory/workflows/`. Skills are installed before wiki content, require no unshipped helper scripts, and the bootstrap cannot report success until its Definition of Done confirms all 27 skill files and dependency checks.
 
 > **Maintainers:** `bootstrap.md` is regenerated from the canonical skill bodies + `project-template/` files by [`scripts/regenerate-bootstrap.py`](scripts/regenerate-bootstrap.py). Run `python scripts/regenerate-bootstrap.py` after any skill or template change.
 
@@ -90,7 +90,7 @@ When the user says "ingest", follow: `~/projects/memory/workflows/ingest.md`
 When the user says "end session", follow: `~/projects/memory/workflows/end-session.md`
 ```
 
-That's it — your agent now has persistent memory and 3 skills.
+That's it — your agent now has persistent memory and 9 skills.
 
 ---
 
@@ -172,9 +172,9 @@ Nine skills drive the system. The three core skills below are the heart of the w
 
 ### 1. Ingest — Add knowledge to the wiki
 
-Say "ingest" followed by content (a document, lesson, conversation). The agent runs a 7-phase pipeline: gather context → classify → compile → update graph → copy raw → self-audit → report.
+Say "ingest" followed by content (a document, lesson, conversation). The agent preserves the raw source, classifies and compiles durable knowledge, updates the graph, emits activity, and runs lint plus self-audit gates.
 
-**Key rule:** Target 8–15 files touched per ingest. If you only touched 2–3, you missed graph updates (index, glossary, backlinks).
+**Key rule:** Touch every file required for raw provenance and graph consistency, but do not pad the change count. The activity event's `files` value must match the distinct changed paths reported.
 
 ### 2. End Session — Capture lessons before context is lost
 
